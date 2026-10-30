@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Slumpa namn, nummer och grupper | Randomisera.se</title>
+<meta name="description" content="Slumpa namn, nummer och grupper gratis. Blanda listor, singla slant och låt slumpen välja direkt i webbläsaren.">
+<link rel="canonical" href="https://randomisera.se/">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f3f6fc" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111a2a" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="./assets/style.css">
+</head>
+<body data-mode="names">
+<a class="skip" href="#main">Hoppa till innehållet</a>
+<header><a href="./" class="brand">randomisera<span>.se</span></a><span class="tag">Låt slumpen välja.</span></header>
+<main id="main"><h1>Slumpa namn, nummer och grupper</h1><p class="intro">Välj ett verktyg och låt slumpen göra jobbet. Gratis, utan inloggning.</p>
+<nav aria-label="Verktyg" id="tools"><a href="./" aria-current="page">Alla verktyg</a><a href="./slumpa-namn/">Slumpa namn</a><a href="./slumpa-nummer/">Slumpa nummer</a><a href="./dela-in-i-grupper/">Dela in i grupper</a><a href="./slumpa-lista/">Slumpa lista</a><a href="./singla-slant/">Singla slant</a></nav>
+<div class="workspace">
+<form id="form">
+<h2 id="title">Slumpa namn</h2><p class="help" id="help">Skriv ett namn per rad. Dra ett eller flera åt gången.</p>
+<div id="listFields"><label for="entries" id="listLabel">Namn, ett per rad</label><textarea id="entries" placeholder="Alex&#10;Kim&#10;Sam&#10;Robin" maxlength="100000"></textarea><label class="check" id="removeDuplicatesLabel"><input type="checkbox" id="dedupe" checked>Ta bort identiska rader</label></div>
+<div id="numberFields" hidden><div class="row"><div><label for="min">Från</label><input id="min" type="number" value="1" min="-1000000000" max="1000000000" required></div><div><label for="max">Till</label><input id="max" type="number" value="100" min="-1000000000" max="1000000000" required></div></div></div>
+<div id="countFields"><label for="count" id="countLabel">Antal namn att dra</label><input id="count" type="number" min="1" max="1000" value="1" required></div>
+<label class="check" id="uniqueLabel"><input id="unique" type="checkbox" checked>Utan upprepningar</label>
+<div id="decisionFields" hidden><label for="decision">Välj typ</label><select id="decision"><option value="coin">Singla slant</option><option value="yes">Ja eller nej</option><option value="dice">Kasta en tärning</option></select></div>
+<p id="error" class="error" role="alert" hidden></p>
+<button type="submit" class="primary" id="submit">Slumpa namn</button>
+<button type="button" id="reset" class="secondary" style="margin-top:12px">Återställ dragningen</button>
+</form>
+<section class="result" aria-label="Resultat"><div class="result-head"><h2>Ditt resultat</h2><button id="copy" class="secondary" disabled>Kopiera</button></div><div id="output" aria-live="polite" aria-atomic="true"><p class="empty">Här dyker resultatet upp.</p></div><p class="note" id="status">Redo när du är.</p></section>
+</div>
+<section class="guide" aria-label="Så fungerar verktyget"><h2>Vad vill du randomisera?</h2><p>Använd namndragning när du vill välja en person, nummergeneratorn för heltal och gruppverktyget för att dela upp deltagare. Du kan också blanda en lista eller singla slant.</p><h2>Så gör du</h2><ol><li>Välj verktyget som passar din uppgift.</li><li>Fyll i din lista eller välj ett talintervall.</li><li>Slumpa och kopiera resultatet om du vill.</li></ol><h2>Vanliga frågor</h2><h3>Vad betyder randomisera?</h3><p>Att randomisera betyder att välja eller ordna något slumpmässigt. Här kan du till exempel slumpa en turordning eller lotta fram ett namn.</p><h3>Vad kan jag slumpa?</h3><p>Namn, nummer, grupper och listor. En lista kan innehålla middagsförslag, filmer, arbetsuppgifter eller vilket alternativ du vill.</p><h2>Din lista stannar i webbläsaren</h2><p>Slumpningen sker på din enhet med webbläsarens inbyggda slumptalsgenerator. Dina inmatade uppgifter skickas inte till oss och sparas inte av verktyget. Ingen inloggning eller några kakor behövs.</p></section><noscript><p>Aktivera JavaScript i webbläsaren för att använda slumpverktyget.</p></noscript>
+</main><footer>Randomisera.se — ett enklare sätt att välja.</footer>
+<script src="./assets/app.js" defer></script>
+</body>
+</html>

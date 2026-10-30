@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Slumpa nummer – välj ett talintervall | Randomisera.se</title>
+<meta name="description" content="Slumpa ett eller flera heltal mellan valfria gränser. Välj unika nummer eller tillåt upprepningar. Enkel slumptalsgenerator online.">
+<link rel="canonical" href="https://randomisera.se/slumpa-nummer/">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f3f6fc" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111a2a" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-mode="numbers">
+<a class="skip" href="#main">Hoppa till innehållet</a>
+<header><a href="../" class="brand">randomisera<span>.se</span></a><span class="tag">Låt slumpen välja.</span></header>
+<main id="main"><h1>Slumpa nummer – välj ett talintervall</h1><p class="intro">Välj lägsta och högsta tal, antal nummer och om samma tal får återkomma.</p>
+<nav aria-label="Verktyg" id="tools"><a href="../">Alla verktyg</a><a href="../slumpa-namn/">Slumpa namn</a><a href="../slumpa-nummer/" aria-current="page">Slumpa nummer</a><a href="../dela-in-i-grupper/">Dela in i grupper</a><a href="../slumpa-lista/">Slumpa lista</a><a href="../singla-slant/">Singla slant</a></nav>
+<div class="workspace">
+<form id="form">
+<h2 id="title">Slumpa nummer</h2><p class="help" id="help">Välj ett intervall. Både det lägsta och högsta talet kan dras.</p>
+<div id="listFields" hidden><label for="entries" id="listLabel">Namn, ett per rad</label><textarea id="entries" placeholder="Alex&#10;Kim&#10;Sam&#10;Robin" maxlength="100000"></textarea><label class="check" id="removeDuplicatesLabel"><input type="checkbox" id="dedupe" checked>Ta bort identiska rader</label></div>
+<div id="numberFields"><div class="row"><div><label for="min">Från</label><input id="min" type="number" value="1" min="-1000000000" max="1000000000" required></div><div><label for="max">Till</label><input id="max" type="number" value="100" min="-1000000000" max="1000000000" required></div></div></div>
+<div id="countFields"><label for="count" id="countLabel">Antal nummer</label><input id="count" type="number" min="1" max="1000" value="1" required></div>
+<label class="check" id="uniqueLabel"><input id="unique" type="checkbox" checked>Utan upprepningar</label>
+<div id="decisionFields" hidden><label for="decision">Välj typ</label><select id="decision"><option value="coin">Singla slant</option><option value="yes">Ja eller nej</option><option value="dice">Kasta en tärning</option></select></div>
+<p id="error" class="error" role="alert" hidden></p>
+<button type="submit" class="primary" id="submit">Slumpa nummer</button>
+<button type="button" id="reset" class="secondary" style="margin-top:12px" hidden>Återställ dragningen</button>
+</form>
+<section class="result" aria-label="Resultat"><div class="result-head"><h2>Ditt resultat</h2><button id="copy" class="secondary" disabled>Kopiera</button></div><div id="output" aria-live="polite" aria-atomic="true"><p class="empty">Här dyker resultatet upp.</p></div><p class="note" id="status">Redo när du är.</p></section>
+</div>
+<section class="guide" aria-label="Så fungerar verktyget"><h2>Slumptalsgenerator för heltal</h2><p>Dra ett tal inför ett spel, välj en slumpad position i en lista eller generera flera olika nummer. Båda gränserna ingår i intervallet.</p><h2>Så gör du</h2><ol><li>Ange det lägsta talet under Från och det högsta under Till.</li><li>Välj antal nummer och om de ska vara unika.</li><li>Tryck på Slumpa nummer för att skapa en ny dragning.</li></ol><h2>Vanliga frågor</h2><h3>Kan jag slumpa negativa tal?</h3><p>Ja. Du kan använda heltal från minus en miljard till plus en miljard, inklusive noll.</p><h3>Kan jag få flera unika nummer?</h3><p>Ja. Markera Utan upprepningar. Intervallet måste innehålla minst lika många olika tal som du vill dra.</p><h3>Ingår det högsta talet?</h3><p>Ja. Om du väljer 1 till 10 kan alla heltal från 1 till och med 10 dras.</p><h2>Din lista stannar i webbläsaren</h2><p>Slumpningen sker på din enhet med webbläsarens inbyggda slumptalsgenerator. Dina inmatade uppgifter skickas inte till oss och sparas inte av verktyget. Ingen inloggning eller några kakor behövs.</p></section><noscript><p>Aktivera JavaScript i webbläsaren för att använda slumpverktyget.</p></noscript>
+</main><footer>Randomisera.se — ett enklare sätt att välja.</footer>
+<script src="../assets/app.js" defer></script>
+</body>
+</html>
