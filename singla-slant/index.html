@@ -12,12 +12,12 @@
 </head>
 <body data-mode="decide">
 <a class="skip" href="#main">Hoppa till innehållet</a>
-<header><a href="../" class="brand">randomisera<span>.se</span></a><span class="tag">Låt slumpen välja.</span></header>
-<main id="main"><h1>Singla slant online – krona eller klave</h1><p class="intro">Krona eller klave? Singla slant, slumpa ja eller nej eller kasta en tärning.</p>
+<header><a href="../" class="brand">randomisera<span>.se</span></a></header>
+<main id="main"><h1>Singla slant online – krona eller klave</h1>
 <nav aria-label="Verktyg" id="tools"><a href="../">Alla verktyg</a><a href="../slumpa-namn/">Slumpa namn</a><a href="../slumpa-nummer/">Slumpa nummer</a><a href="../dela-in-i-grupper/">Dela in i grupper</a><a href="../slumpa-lista/">Slumpa lista</a><a href="../singla-slant/" aria-current="page">Singla slant</a></nav>
 <div class="workspace">
 <form id="form">
-<h2 id="title">Låt slumpen välja</h2><p class="help" id="help">Singla slant, få ett ja eller nej eller kasta en tärning.</p>
+<h2 id="title" class="sr-only">Låt slumpen välja</h2><p class="help" id="help">Singla slant, få ett ja eller nej eller kasta en tärning.</p>
 <div id="listFields" hidden><label for="entries" id="listLabel">Namn, ett per rad</label><textarea id="entries" placeholder="Alex&#10;Kim&#10;Sam&#10;Robin" maxlength="100000"></textarea><label class="check" id="removeDuplicatesLabel"><input type="checkbox" id="dedupe" checked>Ta bort identiska rader</label></div>
 <div id="numberFields" hidden><div class="row"><div><label for="min">Från</label><input id="min" type="number" value="1" min="-1000000000" max="1000000000" required></div><div><label for="max">Till</label><input id="max" type="number" value="100" min="-1000000000" max="1000000000" required></div></div></div>
 <div id="countFields" hidden><label for="count" id="countLabel">Antal namn att dra</label><input id="count" type="number" min="1" max="1000" value="1" required></div>
@@ -29,8 +29,7 @@
 </form>
 <section class="result" aria-label="Resultat"><div class="result-head"><h2>Ditt resultat</h2><button id="copy" class="secondary" disabled>Kopiera</button></div><div id="output" aria-live="polite" aria-atomic="true"><p class="empty">Här dyker resultatet upp.</p></div><p class="note" id="status">Redo när du är.</p></section>
 </div>
-<section class="guide" aria-label="Så fungerar verktyget"><h2>Låt slumpen avgöra ett enkelt val</h2><p>Använd en digital slant för att bestämma vem som börjar eller välj mellan två likvärdiga alternativ. Du kan byta till ja eller nej eller en vanlig sexsidig tärning.</p><h2>Så gör du</h2><ol><li>Välj Singla slant, Ja eller nej eller Kasta en tärning.</li><li>Tryck på Slumpa.</li><li>Tryck igen när du vill göra ett nytt kast.</li></ol><h2>Vanliga frågor</h2><h3>Har krona och klave lika stor chans?</h3><p>Ja. Varje kast väljer mellan två lika sannolika utfall. Tidigare kast påverkar inte nästa kast.</p><h3>Vilken tärning används?</h3><p>En sexsidig tärning med heltalen 1 till 6. Varje sida har samma sannolikhet.</p><h3>Kan samma resultat komma flera gånger?</h3><p>Ja. Varje kast är oberoende. Flera kronor eller flera sexor i följd är möjliga.</p><h2>Din lista stannar i webbläsaren</h2><p>Slumpningen sker på din enhet med webbläsarens inbyggda slumptalsgenerator. Dina inmatade uppgifter skickas inte till oss och sparas inte av verktyget. Ingen inloggning eller några kakor behövs.</p></section><noscript><p>Aktivera JavaScript i webbläsaren för att använda slumpverktyget.</p></noscript>
-</main><footer>Randomisera.se — ett enklare sätt att välja.</footer>
+<noscript><p>Aktivera JavaScript för att använda verktyget.</p></noscript></main><footer>Allt slumpas i din webbläsare.</footer>
 <script src="../assets/app.js" defer></script>
 </body>
 </html>

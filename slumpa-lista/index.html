@@ -12,12 +12,12 @@
 </head>
 <body data-mode="list">
 <a class="skip" href="#main">Hoppa till innehållet</a>
-<header><a href="../" class="brand">randomisera<span>.se</span></a><span class="tag">Låt slumpen välja.</span></header>
-<main id="main"><h1>Slumpa ordningen i en lista</h1><p class="intro">Klistra in en lista och blanda ordningen med ett klick.</p>
+<header><a href="../" class="brand">randomisera<span>.se</span></a></header>
+<main id="main"><h1>Slumpa ordningen i en lista</h1>
 <nav aria-label="Verktyg" id="tools"><a href="../">Alla verktyg</a><a href="../slumpa-namn/">Slumpa namn</a><a href="../slumpa-nummer/">Slumpa nummer</a><a href="../dela-in-i-grupper/">Dela in i grupper</a><a href="../slumpa-lista/" aria-current="page">Slumpa lista</a><a href="../singla-slant/">Singla slant</a></nav>
 <div class="workspace">
 <form id="form">
-<h2 id="title">Blanda en lista</h2><p class="help" id="help">Skriv ett alternativ per rad och få en slumpad ordning.</p>
+<h2 id="title" class="sr-only">Blanda en lista</h2><p class="help" id="help">Skriv ett alternativ per rad och få en slumpad ordning.</p>
 <div id="listFields"><label for="entries" id="listLabel">Namn, ett per rad</label><textarea id="entries" placeholder="Alex&#10;Kim&#10;Sam&#10;Robin" maxlength="100000"></textarea><label class="check" id="removeDuplicatesLabel"><input type="checkbox" id="dedupe" checked>Ta bort identiska rader</label></div>
 <div id="numberFields" hidden><div class="row"><div><label for="min">Från</label><input id="min" type="number" value="1" min="-1000000000" max="1000000000" required></div><div><label for="max">Till</label><input id="max" type="number" value="100" min="-1000000000" max="1000000000" required></div></div></div>
 <div id="countFields" hidden><label for="count" id="countLabel">Antal namn att dra</label><input id="count" type="number" min="1" max="1000" value="1" required></div>
@@ -29,8 +29,7 @@
 </form>
 <section class="result" aria-label="Resultat"><div class="result-head"><h2>Ditt resultat</h2><button id="copy" class="secondary" disabled>Kopiera</button></div><div id="output" aria-live="polite" aria-atomic="true"><p class="empty">Här dyker resultatet upp.</p></div><p class="note" id="status">Redo när du är.</p></section>
 </div>
-<section class="guide" aria-label="Så fungerar verktyget"><h2>Skapa en slumpad turordning</h2><p>Slumpa presentationsordning, blanda övningar eller ordna aktiviteter. Resultatet numreras så att det är lätt att se vem eller vad som kommer först.</p><h2>Så gör du</h2><ol><li>Skriv ett alternativ på varje rad.</li><li>Välj om identiska rader ska tas bort.</li><li>Tryck på Blanda en lista för att slumpa hela ordningen.</li></ol><h2>Vanliga frågor</h2><h3>Försvinner något från listan?</h3><p>Alla ifyllda rader tas med. Tomma rader ignoreras och identiska rader tas bort om det valet är markerat.</p><h3>Kan jag välja mat eller film med verktyget?</h3><p>Ja. Blanda dina förslag och välj det som hamnar först. Vill du bara se ett alternativ kan du använda Slumpa namn med samma lista.</p><h2>Din lista stannar i webbläsaren</h2><p>Slumpningen sker på din enhet med webbläsarens inbyggda slumptalsgenerator. Dina inmatade uppgifter skickas inte till oss och sparas inte av verktyget. Ingen inloggning eller några kakor behövs.</p></section><noscript><p>Aktivera JavaScript i webbläsaren för att använda slumpverktyget.</p></noscript>
-</main><footer>Randomisera.se — ett enklare sätt att välja.</footer>
+<noscript><p>Aktivera JavaScript för att använda verktyget.</p></noscript></main><footer>Allt slumpas i din webbläsare.</footer>
 <script src="../assets/app.js" defer></script>
 </body>
 </html>

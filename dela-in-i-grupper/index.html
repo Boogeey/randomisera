@@ -12,12 +12,12 @@
 </head>
 <body data-mode="groups">
 <a class="skip" href="#main">Hoppa till innehållet</a>
-<header><a href="../" class="brand">randomisera<span>.se</span></a><span class="tag">Låt slumpen välja.</span></header>
-<main id="main"><h1>Dela in i slumpmässiga grupper</h1><p class="intro">Klistra in deltagarna och välj antal grupper. Vi blandar namnen och fördelar dem jämnt.</p>
+<header><a href="../" class="brand">randomisera<span>.se</span></a></header>
+<main id="main"><h1>Dela in i slumpmässiga grupper</h1>
 <nav aria-label="Verktyg" id="tools"><a href="../">Alla verktyg</a><a href="../slumpa-namn/">Slumpa namn</a><a href="../slumpa-nummer/">Slumpa nummer</a><a href="../dela-in-i-grupper/" aria-current="page">Dela in i grupper</a><a href="../slumpa-lista/">Slumpa lista</a><a href="../singla-slant/">Singla slant</a></nav>
 <div class="workspace">
 <form id="form">
-<h2 id="title">Dela in i grupper</h2><p class="help" id="help">Skriv ett namn per rad och välj antal grupper. Storleken blir så jämn som möjligt.</p>
+<h2 id="title" class="sr-only">Dela in i grupper</h2><p class="help" id="help">Skriv ett namn per rad och välj antal grupper. Storleken blir så jämn som möjligt.</p>
 <div id="listFields"><label for="entries" id="listLabel">Namn, ett per rad</label><textarea id="entries" placeholder="Alex&#10;Kim&#10;Sam&#10;Robin" maxlength="100000"></textarea><label class="check" id="removeDuplicatesLabel"><input type="checkbox" id="dedupe" checked>Ta bort identiska rader</label></div>
 <div id="numberFields" hidden><div class="row"><div><label for="min">Från</label><input id="min" type="number" value="1" min="-1000000000" max="1000000000" required></div><div><label for="max">Till</label><input id="max" type="number" value="100" min="-1000000000" max="1000000000" required></div></div></div>
 <div id="countFields"><label for="count" id="countLabel">Antal grupper</label><input id="count" type="number" min="1" max="1000" value="2" required></div>
@@ -29,8 +29,7 @@
 </form>
 <section class="result" aria-label="Resultat"><div class="result-head"><h2>Ditt resultat</h2><button id="copy" class="secondary" disabled>Kopiera</button></div><div id="output" aria-live="polite" aria-atomic="true"><p class="empty">Här dyker resultatet upp.</p></div><p class="note" id="status">Redo när du är.</p></section>
 </div>
-<section class="guide" aria-label="Så fungerar verktyget"><h2>Slumpa lag och grupper</h2><p>Skapa grupper till en lektion, workshop eller spelkväll. Gruppindelningen bygger på slumpen och tar inte hänsyn till kunskapsnivå eller andra egenskaper.</p><h2>Så gör du</h2><ol><li>Skriv deltagarnas namn, ett per rad.</li><li>Välj hur många grupper eller lag du vill ha.</li><li>Tryck på Dela in i grupper och kopiera fördelningen.</li></ol><h2>Vanliga frågor</h2><h3>Blir grupperna lika stora?</h3><p>Så långt det går. Om antalet deltagare inte går jämnt ut skiljer det högst en person mellan grupperna.</p><h3>Kan jag slumpa två lag?</h3><p>Ja. Ange 2 som antal grupper för att dela deltagarna i två slumpade lag.</p><h3>Kan jag göra en ny gruppindelning?</h3><p>Ja. Tryck igen för att blanda deltagarna på nytt. En ny slumpning kan ibland ge samma indelning.</p><h2>Din lista stannar i webbläsaren</h2><p>Slumpningen sker på din enhet med webbläsarens inbyggda slumptalsgenerator. Dina inmatade uppgifter skickas inte till oss och sparas inte av verktyget. Ingen inloggning eller några kakor behövs.</p></section><noscript><p>Aktivera JavaScript i webbläsaren för att använda slumpverktyget.</p></noscript>
-</main><footer>Randomisera.se — ett enklare sätt att välja.</footer>
+<noscript><p>Aktivera JavaScript för att använda verktyget.</p></noscript></main><footer>Allt slumpas i din webbläsare.</footer>
 <script src="../assets/app.js" defer></script>
 </body>
 </html>
