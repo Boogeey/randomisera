@@ -46,7 +46,7 @@
     const text=list.entries.join('\n'),current=$('entries').value;
     if(text.length>$('entries').maxLength){message('Listan är för stor för inmatningsfältet.');return;}
     if(current.trim()&&current!==text&&!window.confirm('Ersätta det som står i inmatningsfältet med listan ”'+list.name+'”?'))return;
-    active={name:list.name,entries:[...list.entries]};$('entries').value=text;$('entries').dispatchEvent(new Event('input',{bubbles:true}));panels(null);activeState();message('Listan ”'+list.name+'” är hämtad.');$('entries').focus();
+    active={name:list.name,entries:[...list.entries]};$('entries').value=text;$('entries').dispatchEvent(new Event('input',{bubbles:true}));panels(null);activeState();message('');$('entries').focus();
   }catch{fail();}}
   function remove(id){try{
     const lists=read(),list=lists.find(item=>normalize(item.name)===id);if(!list){refresh();return;}
