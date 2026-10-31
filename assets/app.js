@@ -12,6 +12,22 @@ function entries(){let a=$('entries').value.split(/\r?\n/).map(x=>x.trim()).filt
 function clearResult(){currentDrawVisible=false;renderHistory();lastText='';$('output').replaceChildren();const p=document.createElement('p');p.className='empty';p.textContent='Här dyker resultatet upp.';$('output').append(p);$('copy').disabled=true;$('status').textContent='Redo när du är.';$('error').hidden=true;}
 function selectMode(next){mode=next;drawn.clear();$('title').textContent=modes[mode][1];$('help').textContent=modes[mode][2];$('submit').textContent=mode==='decide'||mode==='choose'?'Slumpa':modes[mode][1];$('listFields').hidden=!['choose','groups','list'].includes(mode);$('removeDuplicatesLabel').hidden=!['choose','groups','list'].includes(mode);$('numberFields').hidden=mode!=='numbers';$('decisionFields').hidden=mode!=='decide';$('countFields').hidden=!['choose','numbers','groups'].includes(mode);$('uniqueLabel').hidden=!['choose','numbers'].includes(mode);$('reset').hidden=mode!=='choose';$('countLabel').textContent=mode==='groups'?'Antal grupper':mode==='numbers'?'Antal nummer':'Antal att välja';$('listLabel').textContent=mode==='list'||mode==='choose'?'Alternativ, ett per rad':'Namn, ett per rad';$('count').value=mode==='groups'?2:1;for(const id of ['min','max'])$(id).disabled=mode!=='numbers';$('count').disabled=$('countFields').hidden;clearResult();}
 
+function scrollToResult(){
+  requestAnimationFrame(()=>{
+    const scrollTarget=$(mode==='decide'?'decisionFields':(mode==='groups'||mode==='choose')?'countFields':mode==='numbers'?'numberFields':'submit');
+    const offset=(window.visualViewport?.offsetTop || 0)+16;
+    const oldSpace=parseFloat(document.body.style.getPropertyValue('--result-scroll-space')) || 0;
+    const target=Math.max(0,window.scrollY+scrollTarget.getBoundingClientRect().top-offset);
+    const contentBottom=window.scrollY+document.body.getBoundingClientRect().bottom-oldSpace;
+    // A short page cannot align the target without room below it. Recalculate
+    // the missing space so growing history does not move the target each draw.
+    const space=Math.max(0,Math.ceil(target+window.innerHeight-contentBottom));
+    document.body.style.setProperty('--result-scroll-space',space+'px');
+    document.body.style.setProperty('--result-scroll-offset',offset+'px');
+    scrollTarget.scrollIntoView({block:'start',inline:'nearest'});
+  });
+}
+
 function show(lines,status){
   const result=document.createElement(mode==='list'?'ol':mode==='groups'?'div':'ul');
   result.className='results'+(lines.length===1&&!['groups','list'].includes(mode)?' single':'');
@@ -33,6 +49,7 @@ function show(lines,status){
   const label=mode==='decide'?{coin:'Slant',yes:'Ja eller nej',dice:'Tärning'}[$('decision').value]:'Dragning';
   resultHistory.push({text:lastText,label});currentDrawVisible=true;renderHistory();
   $('copy').disabled=false;$('copy').textContent='Kopiera';$('status').textContent=status;
+  scrollToResult();
 }
 $('form').addEventListener('submit',e=>{e.preventDefault();$('error').hidden=true;try{let lines=[],status='Slumpat och klart.';const count=Number($('count').value);if(['choose','numbers','groups'].includes(mode)&&(!Number.isInteger(count)||count<1||count>1000))throw Error('Välj ett heltal mellan 1 och 1 000.');if(mode==='numbers'){const min=Number($('min').value),max=Number($('max').value);if(!Number.isInteger(min)||!Number.isInteger(max)||min>max||min< -1e9||max>1e9)throw Error('Ange heltal mellan −1 miljard och 1 miljard. Från får inte vara större än till.');const range=max-min+1;if($('unique').checked&&count>range)throw Error('Det finns för få olika nummer. Minska antalet eller tillåt upprepningar.');if($('unique').checked){const selected=new Set();for(let j=range-count;j<range;j++){const t=randomInt(j+1);selected.add(selected.has(t)?j:t)}lines=shuffle([...selected]).map(n=>String(n+min))}else lines=Array.from({length:count},()=>String(min+randomInt(range)));}else if(mode==='decide'){const type=$('decision').value;lines=[type==='dice'?String(1+randomInt(6)):type==='yes'?['Ja','Nej'][randomInt(2)]:['Krona','Klave'][randomInt(2)]];}else{const list=entries();if(!list.length)throw Error('Skriv minst ett alternativ, ett per rad.');if(list.length>10000)throw Error('Använd högst 10 000 rader åt gången.');if(mode==='list')lines=shuffle(list);if(mode==='groups'){if(count>list.length)throw Error('Antalet grupper får inte vara större än antalet personer.');const groups=Array.from({length:count},()=>[]);shuffle(list).forEach((x,i)=>groups[i%count].push(x));lines=groups;status=`${list.length} personer i ${count} grupper.`;}if(mode==='choose'){const pool=list.map((value,index)=>({value,index})).filter(x=>!$('unique').checked||!drawn.has(x.index));if($('unique').checked){if(count>pool.length)throw Error(`Det finns ${pool.length} alternativ kvar. Minska antalet eller återställ urvalet.`);const picks=shuffle(pool).slice(0,count);picks.forEach(x=>drawn.add(x.index));lines=picks.map(x=>x.value);status=`${pool.length-count} av ${list.length} alternativ kvar.`;}else lines=Array.from({length:count},()=>list[randomInt(list.length)]);}}show(lines,status);}catch(err){$('error').textContent=err.message;$('error').hidden=false;}});
 for(const id of ['entries','dedupe','unique'])$(id).addEventListener('input',()=>{drawn.clear();clearResult()});

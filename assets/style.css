@@ -125,6 +125,13 @@ footer p { margin: 5px 0 0; }
 .text-field-actions{display:flex;justify-content:flex-end;min-height:34px;margin-top:-8px;margin-bottom:6px}.text-field-actions button{font-weight:400;padding:5px 11px}
 
 
-.privacy-link{display:block;width:fit-content;margin-top:10px;font-size:12px;color:var(--muted);text-underline-offset:3px}.privacy-page h2{font-size:19px;font-weight:600;line-height:1.4;margin:28px 0 10px}.privacy-page p{font-size:14px;line-height:1.7;margin:10px 0}.privacy-page code{font-size:12px;overflow-wrap:anywhere}
+.privacy-link{color:var(--muted);text-underline-offset:3px}.privacy-page h2{font-size:19px;font-weight:600;line-height:1.4;margin:28px 0 10px}.privacy-page p{font-size:14px;line-height:1.7;margin:10px 0}.privacy-page code{font-size:12px;overflow-wrap:anywhere}
 
 .saved-lists{margin-top:14px;font-size:13px}.list-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}.list-toolbar button{font-weight:400}.list-panel{background:var(--result);border-radius:7px;padding:16px;margin-top:14px}.list-panel h3{font-size:16px;font-weight:600;margin:0}.list-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.list-panel label{margin:16px 0 8px}.list-panel input{width:100%;min-height:44px;border:1px solid var(--line);border-radius:5px;padding:10px 14px;background:var(--surface);color:var(--text);font-size:16px}.list-panel input::placeholder{color:var(--muted)}#saved-list-items{list-style:none;margin:12px 0 0;padding:0;max-height:360px;overflow:auto}#saved-list-items li{padding:12px 0;border-top:1px solid var(--line);display:flex;gap:12px;align-items:center;flex-wrap:wrap}.saved-list-info{flex:1 1 150px;min-width:0;overflow-wrap:anywhere}.saved-list-info strong{display:block;font-size:15px;font-weight:600}.saved-list-info span{display:block;color:var(--muted);font-size:12px;margin-top:4px}.saved-list-actions{display:flex;gap:8px}.saved-list-actions button{font-weight:400}.saved-list-actions .delete-saved-list{background:transparent;color:var(--muted)}#active-list-name{margin-top:12px;overflow-wrap:anywhere}#saved-list-status{margin:10px 0;font-size:13px}#saved-list-status:empty{display:none}
+
+/* CSS controls scroll motion; JavaScript targets a successful draw. */
+html{scroll-behavior:smooth}body{padding-bottom:var(--result-scroll-space,0px)}#submit,#decisionFields,#countFields,#numberFields{scroll-margin-block-start:var(--result-scroll-offset,16px)}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+.footer-links{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 9px;font-size:13px}.footer-links a{font-size:inherit}.footer-links span{color:var(--muted)}
+
+.contact-link{color:var(--muted);text-underline-offset:3px}
