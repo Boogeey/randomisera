@@ -2,3 +2,6 @@
 # Local preview tooling
 /.local/
 /start-local.cmd
+
+# Generated deployment files
+/_site/

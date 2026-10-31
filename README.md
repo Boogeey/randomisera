@@ -1,29 +1,36 @@
 # Randomisera
 
-A lightweight static website for choosing random options, generating numbers, creating groups, shuffling lists, and flipping a coin.
+A small static website for random choices, numbers, groups, shuffled lists, and coin flips. No framework, package installation, database, or account is required.
+
+## Development
+
+Edit the HTML and the shared files in `assets/`. Open `index.html` directly for basic preview, or use a localhost server for shared local storage and PWA testing. This machine's `start-local.cmd` is local-only and excluded from Git.
+
+Run the automated checks and create the deployment folder with Node.js 22 or newer:
+
+```sh
+node --test tests/*.test.cjs
+node scripts/build-site.cjs
+```
+
+The build creates `_site/`, containing only public website files. It generates a deterministic cache ID from all offline assets and the service worker. **Do not increment cache versions manually.** `_site/` is not committed.
+
+## Publication
+
+The workflow in `.github/workflows/pages.yml` tests, builds, and deploys `_site/` on pushes to `main`.
+
+**One-time setup:** in the repository's **Settings → Pages → Build and deployment**, choose **GitHub Actions** as the source. Keep the existing custom domain. See the [publication and PWA guide](docs/Publication.md).
 
 ## PWA
 
-All tool pages link to the app manifest and icons. The footer button opens the installation prompt when supported; otherwise, it displays installation instructions. Test over HTTPS or localhost. Installation is not available through `file://`.
+The footer offers **Lägg till på hemskärmen** on mobile or **Lägg till som app** on desktop. Supported browsers open their native installation prompt; other browsers show instructions. Installed app windows hide the installation action based on their actual display mode, not a saved installation flag.
 
-Offline files are prepared as part of the user-requested installation flow. On iPhone, opening the installed app also prepares offline files unless the user previously removed them. Local storage remembers installation and offline preferences; it does not store input lists or results. Explicitly saved lists use a separate localStorage key. Input lists are saved only when the user chooses Save list; result history is not persisted. Test installation and offline functionality on both iPhone and Android after deployment. An installed iPhone web app may use storage separate from Safari, so offline access may need to be enabled from within the installed app as well.
+Offline preparation follows the installation request or first launch of the installed app. Cached files are served immediately as one release; a new worker prepares the next release in the background and waits until old controlled windows close. No automatic reload interrupts an active session. Offline storage and removal are available in a small expandable footer section.
 
-When cached files change, increment `CACHE` in `sw.js`. Old offline files are replaced when the new service worker activates after the old tabs and app windows close. Online requests try the network first.
+Use HTTPS or localhost and test the generated `_site/` build when checking PWA updates. The source worker uses a fixed development cache name and is not a release artifact. This machine's local server also supports `node .local/serve.cjs 4173 --built` after a build. Browser storage restrictions and eviction can affect offline availability.
 
-## Before every deployment
+## Saved lists and privacy
 
-**Increment the cache version in `sw.js` whenever cached files change.** Follow the [deployment checklist and PWA update guide](docs/Publication.md).
+Choose, Groups, and List share named lists through `randomisera-saved-lists-v1` in localStorage. Only explicit Save or Save changes actions persist input. Names are normalized to avoid duplicates, and replacement/deletion requires confirmation. Input overwrite and cross-tab conflicts are confirmed before proceeding. Result history remains in memory only.
 
-## Saved lists
-
-The Choose, Groups, and List tools share named lists through the `randomisera-saved-lists-v1` localStorage key. Data uses `{version: 1, lists: [{name, entries}]}`. Nothing is saved automatically. Names are compared after Unicode normalization, trimming, whitespace normalization, and case folding. Replacing an existing list, deleting it, and loading into a different nonempty input require confirmation. Loading resets the current selection through the input event but preserves result history.
-
-Lists remain local to the current browser/storage context and are not synchronized between devices. Clearing website data removes them. An installed iPhone app may have separate storage from Safari. Storage errors are reported without overwriting input or unreadable saved data. Removing offline files does not delete saved lists; use each list's Delete action to remove it.
-
-## Local preview
-
-Open `index.html` directly to preview the tools and navigation. Internal links explicitly include `index.html`. PWA installation and service workers require HTTPS or a localhost server. For reliable shared saved lists, use localhost: localStorage behavior for `file://` URLs varies by browser and may be separate for each file. Canonical URLs keep the public directory addresses.
-
-### Saved-list interface
-
-Load list opens a picker with each list's name, item count, Use, and Delete actions. Save list opens a separate naming panel. After loading or saving, the active list name is shown; Save changes is enabled only when the entries differ from the loaded snapshot. Save as new list opens an empty name field. Existing localStorage data remains compatible. Updates detect conflicting changes made in another tab and ask before replacing them. No edits are saved automatically.
+The separate `randomisera-pwa-preferences` key stores only the offline choice, never whether installation is presumed to have succeeded. Previous installation flags are migrated away. Removing offline files does not remove saved lists. Storage may be separate between Safari and an installed iPhone app; nothing is synchronized between devices.

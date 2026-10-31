@@ -145,3 +145,5 @@ html{scroll-behavior:smooth}body{padding-bottom:var(--result-scroll-space,0px)}#
 .contact-link{color:var(--muted);text-underline-offset:3px}
 
 .message{font-size:14px;line-height:1.6;padding:12px 14px;margin:16px 0;border-radius:6px;border-left:3px solid;overflow-wrap:anywhere}.message--guide{color:var(--text);background:var(--guide-bg);border-color:var(--guide-line)}.message--error{color:var(--error);background:var(--error-bg);border-color:var(--error-line)}.message:empty{display:none}
+
+#offline-settings{margin-top:12px}#offline-settings summary{cursor:pointer;padding:8px 0;min-height:34px}#offline-settings button{margin:8px 8px 0 0}

@@ -1,70 +1,73 @@
-# Deployment and PWA updates
+# Publication and PWA updates
 
-## Important rule before every deployment
+## One-time GitHub Pages setup
 
-**Whenever a file listed in `FILES` in `sw.js` changes, give `CACHE` a new, unique version number.** This includes minor text changes, CSS, JavaScript, the manifest, and icons.
+After committing and pushing these changes, open **Settings → Pages → Build and deployment** and select **GitHub Actions** as the publishing source. Keep the existing custom domain and HTTPS settings. A source-branch deployment does not run our cache-ID build step; publish the generated artifact using the provided workflow.
 
-For example, change `randomisera-offline-v1` to `randomisera-offline-v2`. Always check the current value in `sw.js`; these version numbers are examples only.
+The workflow uses `main`, has separate build and deployment jobs, and deploys only `_site/`. It does not publish source tooling, tests, local preview files, or documentation.
 
-The version must change because the browser detects service worker updates by changes to the worker file. Without a version change, users may receive current files online while retaining outdated offline files. Do not reuse a cache key for a new release.
+## Normal release process
 
-## Checklist before committing and pushing
+1. Review and test the changes: `node --test tests/*.test.cjs`.
+2. If a page or asset is added, moved, or removed, update the JSON `FILES` array in `sw.js`.
+3. Run `node scripts/build-site.cjs` locally if you want to inspect the generated release.
+4. Commit the source changes and push to `main`.
+5. Wait for the **Publish website** workflow to finish.
+6. Verify installation, offline access, and an upgrade on real iPhone and Android devices.
 
-- [ ] Review the changes and test the affected tools.
-- [ ] Increment `CACHE` in `sw.js` if any cached file changed.
-- [ ] Update `FILES` in `sw.js` whenever a page or resource is added, moved, or removed.
-- [ ] Verify that every URL in `FILES` can be fetched. A single failed request can prevent the entire new offline installation from completing.
-- [ ] Deploy changed pages, assets, and `sw.js` together in the same commit/deployment.
-- [ ] Review the diff and include new files, such as the manifest, service worker, and icons, in the commit.
-- [ ] Push and wait for the GitHub Pages deployment to succeed.
+**Never edit a cache version number manually.** The build hashes the service worker template plus each offline file's path and contents. Unchanged inputs produce the same ID; changes to any input produce a new ID. Rolling back produces the ID of that release's contents. The generated worker and offline files are uploaded in the same Pages artifact.
 
-## How users receive updates
+The source worker uses `randomisera-offline-development`. The generated worker has a name such as `randomisera-offline-a7c91e42f830d112`. `_site/` is disposable, ignored by Git, and recreated only after all required source files have been verified.
 
-The footer action “Installera – fungerar även offline” (Install – works offline too) starts a combined installation/offline flow. Browser confirmation is still required; on iPhone the page displays manual instructions. Offline preparation can succeed even if installation is cancelled. Opening the installed app also prepares offline files unless previously disabled.
+## Installation flow
 
-1. When online, the app tries to fetch current files from the network. The browser's normal HTTP cache can affect when a new file is retrieved; immediate updates for every user are not guaranteed.
-2. The browser checks the registered service worker for updates, typically while the website is being used. Updates are not pushed to a closed app on a guaranteed schedule.
-3. When a changed `sw.js` is detected, the files in `FILES` are downloaded into the new version's cache.
-4. The new worker normally waits until all windows and tabs controlled by the old worker have closed. We do not force a switch during a session with `skipWaiting()`.
-5. When the new worker activates, it deletes old cache versions whose names start with `randomisera-offline-`.
-6. When a network request fails or returns an HTTP error, the worker falls back to the active offline cache for URLs listed in `FILES`.
+- Ordinary first visits do not register a service worker or create offline preferences.
+- The footer offers **Lägg till på hemskärmen** on mobile or **Lägg till som app** on desktop in browser windows.
+- If the native installation prompt is available, the button opens it. Cancellation does not request offline preparation. Acceptance or the browser's `appinstalled` event starts preparation.
+- Where no native prompt is exposed, the button displays platform instructions and requests offline preparation. Files can therefore be saved even if the user does not complete the manual installation.
+- Opening an installed app prepares offline files unless the user previously disabled offline access.
+- Installed windows hide the promotion using their real display mode. No persistent `installed` flag is used. A separate browser window may still offer installation; reliable cross-platform detection of installation elsewhere is unavailable.
+- Preparation is silent on success. Readiness is shown only inside the expandable **Offlinelagring** section. Failures open that section with a retry action.
 
-Users normally do not need to reinstall the app. Changes do not automatically appear in a page that is already open. Users need an internet connection to download a new version and may need to close all app windows and browser tabs before opening the app again. Simply switching to another app does not necessarily close the PWA window.
+## Cached releases and updates
 
-Online files and stored offline files may temporarily belong to different releases. Do not assume every user receives a new release at the same time. If strictly synchronized, version-consistent updates become necessary, the loading strategy will need further development.
+1. Installation saves the complete offline file set. A failed download prevents activation of the new worker; the previous release remains available.
+2. Once active, the worker serves its cached release immediately without waiting for the network. Query strings and explicit `index.html` links resolve to the same cached page.
+3. Update checks occur independently of page rendering, including a background `registration.update()` check after load. An internet connection is required to download a new release.
+4. A new worker prepares its own cache and waits while windows controlled by the previous worker remain open. We do not call `skipWaiting()` and never reload an active page automatically.
+5. After old controlled windows close, the new worker activates. It removes only older `randomisera-offline-` caches and claims eligible clients. Saved lists are never part of that cleanup.
+6. If storage is evicted, the client can ask the active worker to rebuild its complete cache. A missing individual cache entry can be retrieved online without putting newer assets into the old cache.
 
-## Verification after deployment
+The first page used to request offline access may already have loaded from the network before a worker takes control. A previously installed legacy worker is also allowed to finish its session before the new worker takes over. Allow the update to download, close all relevant app windows and browser tabs, and reopen to verify the new release. Switching away from an app does not necessarily close it.
 
-Test on both iPhone and Android, preferably including an upgrade from an already installed previous version:
+There is no update notification yet. Updates are not pushed to closed apps on a guaranteed schedule, and storage is not guaranteed to persist indefinitely.
 
-- [ ] Open the website over HTTPS and check navigation, themes, and tools.
-- [ ] Check home screen installation and the dice icon.
-- [ ] Use the installation action and wait for offline confirmation. On iPhone, open the installed app online to prepare its separate storage.
-- [ ] Close all relevant tabs and app windows, then reopen the app. For an upgrade, first allow the app to connect online and download the update.
-- [ ] Enable airplane mode and reopen the app. Test every tool and navigation between pages.
-- [ ] Verify that a change from the new release is actually visible offline. Merely opening the page is not sufficient to verify an update.
-- [ ] Test “Ta bort offlinefiler” (Remove offline files) and restart the app. Offline files must not download automatically again after removal. A retry action is available after a failed download.
+## Offline controls and local storage
 
-## Limitations and troubleshooting
+`randomisera-pwa-preferences` contains only `{offlineRequested: true}` or `{offlineRequested: false}`. Old `installed` properties are removed when read. An explicitly disabled offline choice is respected on later app launches. A user can enable offline again from **Offlinelagring**.
 
-- There is currently no update notification or button to activate a waiting update.
-- Users or browsers can clear offline storage. It is not guaranteed to persist permanently.
-- Safari and an installed iPhone web app may have separate storage. Offline access may need to be enabled within the installed app as well.
-- The PWA cache stores app files only. Explicitly saved lists use localStorage; result history disappears when the page is reloaded or closed.
-- If an update appears stuck, check that `CACHE` changed, all `FILES` are deployed, and old app windows and tabs have closed.
-- If necessary, users can remove offline files while online and download them again. Reinstalling the app should not be the first troubleshooting step.
-- When rolling back to older code, still use a new cache version so the rollback is detected as a new release.
+Removing offline files unregisters this app's worker and removes only its cache prefix. It preserves saved lists and records the disabled choice. Users should restart the app to release any already running worker. Controls are disabled during preparation or removal to avoid conflicting operations. Storage failures are handled without preventing the randomization tools from working.
 
-## Local installation preferences
+Named lists use the separate `randomisera-saved-lists-v1` key with `{version:1, lists:[{name,entries}]}`. Existing data remains compatible. Loading a list does not save edits automatically; updating a saved list or creating another one requires an explicit action. Result history is not persisted.
 
-The `randomisera-pwa-preferences` localStorage entry stores only installation/offline preferences, never input lists or results. A normal first visit does not create it. Storage access failures do not prevent tool use or installation. Confirmed installation or standalone mode hides the installation action and shows App settings instead. A fresh browser install prompt overrides an old installed flag. Uninstallation cannot always be detected, so an outdated flag may hide the action; installation is still accessible through the browser menu.
+## Test checklist after deployment
 
-## Saved lists
+- [ ] Open the site over HTTPS and check tools, navigation, themes, and the footer.
+- [ ] Test normal and cancelled installation in Android Chrome.
+- [ ] Test Safari's Add to Home Screen flow and launch the installed iPhone app online.
+- [ ] Verify that installation instructions are hidden inside the installed app.
+- [ ] Expand **Offlinelagring** and check readiness.
+- [ ] Close and reopen in airplane mode; test every tool and page link.
+- [ ] Save a named list, deploy a changed release, open online to download the update, close all old app windows/tabs, and reopen. Confirm the changed release is available offline and the saved list remains.
+- [ ] Remove offline files, restart, and check that they do not reappear automatically. Enable offline again and retry airplane mode.
+- [ ] Check behavior with blocked localStorage and unavailable storage.
 
-The Choose, Groups, and List tools share named lists through the `randomisera-saved-lists-v1` localStorage key. Data uses `{version: 1, lists: [{name, entries}]}`. Nothing is saved automatically. Names are compared after Unicode normalization, trimming, whitespace normalization, and case folding. Replacing an existing list, deleting it, and loading into a different nonempty input require confirmation. Loading resets the current selection through the input event but preserves result history.
+Safari and an installed iPhone app may have separate storage. Offline preparation and tests may need to happen inside the installed app. Clearing website data removes saved lists; uninstalling alone may not clear all website data.
 
-Lists remain local to the current browser/storage context and are not synchronized between devices. Clearing website data removes them. An installed iPhone app may have separate storage from Safari. Storage errors are reported without overwriting input or unreadable saved data. Removing offline files does not delete saved lists; use each list's Delete action to remove it.
+## Troubleshooting
 
-### Saved-list interface
-
-Load list opens a picker with each list's name, item count, Use, and Delete actions. Save list opens a separate naming panel. After loading or saving, the active list name is shown; Save changes is enabled only when the entries differ from the loaded snapshot. Save as new list opens an empty name field. Existing localStorage data remains compatible. Updates detect conflicting changes made in another tab and ask before replacing them. No edits are saved automatically.
+- If deployment fails, check Actions and verify the Pages source is **GitHub Actions**.
+- If offline preparation fails, check every URL in `FILES` and the browser's storage availability.
+- If an old release remains, allow an online update check, close all controlled windows/tabs, and reopen. Do not force a reload during an active draw.
+- When testing locally, serve `_site/` for production-like PWA behavior. For ordinary source editing, disable offline access on localhost so an old development cache does not hide edits.
+- Do not delete or rename `sw.js` as a way to remove a worker. Existing clients keep their registration until it is explicitly unregistered.
