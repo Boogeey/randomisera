@@ -15,7 +15,7 @@ The workflow uses `main`, has separate build and deployment jobs, and deploys on
 5. Wait for the **Publish website** workflow to finish.
 6. Verify installation, offline access, and an upgrade on real iPhone and Android devices.
 
-**Never edit a cache version number manually.** The build hashes the service worker template plus each offline file's path and contents. Unchanged inputs produce the same ID; changes to any input produce a new ID. Rolling back produces the ID of that release's contents. The generated worker and offline files are uploaded in the same Pages artifact.
+**Never edit a cache version number manually.** The build minifies HTML, CSS, JavaScript, and the manifest, then hashes the minified worker template plus each published offline file's path and contents. Unchanged inputs produce the same ID; changes to any input produce a new ID. Rolling back produces the ID of that release's contents. The generated worker and offline files are uploaded in the same Pages artifact.
 
 The source worker uses `randomisera-offline-development`. The generated worker has a name such as `randomisera-offline-a7c91e42f830d112`. `_site/` is disposable, ignored by Git, and recreated only after all required source files have been verified.
 
@@ -71,3 +71,9 @@ Safari and an installed iPhone app may have separate storage. Offline preparatio
 - If an old release remains, allow an online update check, close all controlled windows/tabs, and reopen. Do not force a reload during an active draw.
 - When testing locally, serve `_site/` for production-like PWA behavior. For ordinary source editing, disable offline access on localhost so an old development cache does not hide edits.
 - Do not delete or rename `sw.js` as a way to remove a worker. Existing clients keep their registration until it is explicitly unregistered.
+
+## Publication minification
+
+Source files remain readable and are never overwritten by the build. esbuild minifies JavaScript (including the service worker) and CSS; html-minifier-terser minifies HTML conservatively, preserving quoted attributes and optional tags. The web app manifest is compact JSON. Legal JavaScript/CSS notices are retained. No minifier or node_modules files are shipped to visitors, and no source maps are published.
+
+Run `npm ci --ignore-scripts` once after checkout or dependency changes, then `npm test` and `npm run build`. GitHub Actions performs these steps automatically using the pinned package-lock.json. Build tools are development dependencies only. Formatting-only changes that produce identical output do not change the cache ID.

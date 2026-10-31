@@ -5,3 +5,6 @@
 
 # Generated deployment files
 /_site/
+
+# Build dependencies
+/node_modules/

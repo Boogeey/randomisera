@@ -1,6 +1,6 @@
 # Randomisera
 
-A small static website for random choices, numbers, groups, shuffled lists, and coin flips. No framework, package installation, database, or account is required.
+A small static website for random choices, numbers, groups, shuffled lists, and coin flips. No runtime framework, database, or account is required. Build dependencies are used only for publication.
 
 ## Development
 
@@ -9,11 +9,12 @@ Edit the HTML and the shared files in `assets/`. Open `index.html` directly for 
 Run the automated checks and create the deployment folder with Node.js 22 or newer:
 
 ```sh
-node --test tests/*.test.cjs
-node scripts/build-site.cjs
+npm ci --ignore-scripts
+npm test
+npm run build
 ```
 
-The build creates `_site/`, containing only public website files. It generates a deterministic cache ID from all offline assets and the service worker. **Do not increment cache versions manually.** `_site/` is not committed.
+The build creates `_site/`, containing only public website files. It generates a deterministic cache ID from the final minified offline assets and service worker. **Do not increment cache versions manually.** `_site/` is not committed.
 
 ## Publication
 
@@ -34,3 +35,9 @@ Use HTTPS or localhost and test the generated `_site/` build when checking PWA u
 Choose, Groups, and List share named lists through `randomisera-saved-lists-v1` in localStorage. Only explicit Save or Save changes actions persist input. Names are normalized to avoid duplicates, and replacement/deletion requires confirmation. Input overwrite and cross-tab conflicts are confirmed before proceeding. Result history remains in memory only.
 
 The separate `randomisera-pwa-preferences` key stores only the offline choice, never whether installation is presumed to have succeeded. Previous installation flags are migrated away. Removing offline files does not remove saved lists. Storage may be separate between Safari and an installed iPhone app; nothing is synchronized between devices.
+
+## Publication minification
+
+Source files remain readable and are never overwritten by the build. esbuild minifies JavaScript (including the service worker) and CSS; html-minifier-terser minifies HTML conservatively, preserving quoted attributes and optional tags. The web app manifest is compact JSON. Legal JavaScript/CSS notices are retained. No minifier or node_modules files are shipped to visitors, and no source maps are published.
+
+Run `npm ci --ignore-scripts` once after checkout or dependency changes, then `npm test` and `npm run build`. GitHub Actions performs these steps automatically using the pinned package-lock.json. Build tools are development dependencies only. Formatting-only changes that produce identical output do not change the cache ID.
