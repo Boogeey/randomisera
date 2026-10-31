@@ -5,7 +5,7 @@
   const normalize=name=>name.normalize('NFKC').trim().replace(/\s+/g,' ').toLocaleLowerCase('sv');
   const inputEntries=()=>$('entries').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
   const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
-  const message=text=>{$('saved-list-status').textContent=text;};
+  const message=(text,kind='guide')=>{const element=$('saved-list-status');element.className=text?'message message--'+kind:'';element.textContent=text;};
   let active=null,saveReturn='open-save';
   function read(){
     const raw=localStorage.getItem(key);if(raw===null)return [];
@@ -15,7 +15,7 @@
     return data.lists;
   }
   function write(lists){localStorage.setItem(key,JSON.stringify({version:1,lists}));}
-  const fail=()=>message('Kunde inte läsa eller spara listorna. Webbläsarens lagring kan vara blockerad, full eller innehålla skadade data. Din inmatning finns kvar.');
+  const fail=(saving=false)=>message(saving?'Listan kunde inte sparas. Kontrollera att webbläsaren tillåter lokal lagring och att det finns ledigt utrymme. Försök sedan igen. Texten du skrivit finns kvar.':'Listorna kunde inte läsas eller uppdateras. Kontrollera att webbläsaren tillåter lokal lagring och försök igen. Texten du skrivit finns kvar.','error');
   function activeState(){
     $('active-list').hidden=!active;$('open-save').hidden=!!active;
     $('active-list-name').textContent=active?'Hämtad lista: '+active.name:'';
@@ -62,7 +62,7 @@
       if(index!==-1&&!window.confirm('Vill du ersätta listan ”'+lists[index].name+'”?'))return;
       const list={name,entries};if(index===-1)lists.push(list);else lists[index]=list;
       write(lists);active={name,entries:[...entries]};refresh();panels(null);message('Listan ”'+name+'” är sparad.');$('entries').focus();
-    }catch{fail();}
+    }catch{fail(true);}
   }
   $('open-lists').addEventListener('click',()=>{try{refresh();panels($('list-picker').hidden?'picker':null);message('');if(!$('list-picker').hidden)$('close-lists').focus();}catch{fail();}});
   $('close-lists').addEventListener('click',()=>{panels(null);$('open-lists').focus();});
@@ -76,7 +76,7 @@
     if(index===-1){refresh();message('Den sparade listan har tagits bort. Välj Spara lista för att spara på nytt.');return;}
     if(!same(lists[index].entries,active.entries)&&!window.confirm('Listan har ändrats på en annan sida. Vill du ersätta den sparade versionen?'))return;
     const name=lists[index].name;lists[index]={name,entries};write(lists);active={name,entries:[...entries]};refresh();message('Ändringarna i ”'+name+'” är sparade.');
-  }catch{fail();}});
+  }catch{fail(true);}});
   $('entries').addEventListener('input',activeState);
   window.addEventListener('storage',event=>{if(event.key===key||event.key===null){try{refresh();}catch{fail();}}});
   try{refresh();}catch{activeState();fail();}

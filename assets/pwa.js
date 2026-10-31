@@ -1,6 +1,7 @@
 'use strict';
 const appRoot = new URL('../', document.currentScript.src);
 const ui = id => document.getElementById(id);
+function pwaMessage(text,kind='guide'){const element=ui('offline-status');element.className='message message--'+kind;element.textContent=text;}
 let installPrompt = null;
 const storageKey='randomisera-pwa-preferences';
 function readPreferences(){try{return JSON.parse(localStorage.getItem(storageKey))||{};}catch{return {};}}
@@ -45,11 +46,11 @@ async function cached(){
   return false;
 }
 ui('enable-offline').disabled=!supported;
-if(!supported)ui('offline-status').textContent='Offlinefunktionen kräver HTTPS och en webbläsare med stöd för offlinefiler.';
+if(!supported)pwaMessage('Offlinefunktionen kräver HTTPS och en webbläsare med stöd för offlinefiler.');
 let savingOffline=false;
 async function enableOffline(){
   if(savingOffline)return; savingOffline=true;
-  ui('enable-offline').disabled=true;ui('offline-status').textContent='Sparar verktygets filer…';
+  ui('enable-offline').disabled=true;pwaMessage('Sparar verktygets filer…');
   try{
     const registration=await navigator.serviceWorker.register(new URL('sw.js',appRoot),{scope:appRoot.href});
     const worker=registration.installing || registration.waiting || registration.active;
@@ -59,12 +60,12 @@ async function enableOffline(){
       const check=()=>{if(registration.active){clearTimeout(timer);resolve();}else if(worker.state==='redundant'){clearTimeout(timer);reject(Error('activation'));}};
       worker.addEventListener('statechange',check);check();
     });
-    if(!await cached())throw Error('cache');offlineState(true);ui('offline-status').textContent='Klart! Verktygen kan nu användas utan internet. Webbläsaren kan rensa filerna om lagringsutrymmet behövs.';
-  }catch{ui('enable-offline').hidden=false;ui('enable-offline').textContent='Försök igen';ui('offline-status').textContent='Kunde inte spara offlinefilerna. Kontrollera anslutningen och försök igen.';}
+    if(!await cached())throw Error('cache');offlineState(true);pwaMessage('Klart! Verktygen kan nu användas utan internet. Webbläsaren kan rensa filerna om lagringsutrymmet behövs.');
+  }catch{ui('enable-offline').hidden=false;ui('enable-offline').textContent='Försök igen';pwaMessage('Kunde inte spara offlinefilerna. Kontrollera anslutningen och försök igen.','error');}
   finally{ui('enable-offline').disabled=false;savingOffline=false;}
 }
 ui('enable-offline').addEventListener('click',()=>{remember({offlineRequested:true});enableOffline();});
-ui('disable-offline').addEventListener('click',async()=>{ui('disable-offline').disabled=true;try{const reg=await navigator.serviceWorker.getRegistration(appRoot.href);if(reg && reg.scope===appRoot.href)await reg.unregister();for(const key of await caches.keys())if(key.startsWith('randomisera-offline-'))await caches.delete(key);remember({offlineRequested:false});offlineState(false);ui('offline-status').textContent='Offlinefilerna är borttagna. Starta om appen för att avsluta offlineläget helt.';}catch{ui('offline-status').textContent='Kunde inte ta bort offlinefilerna. Försök igen.';}finally{ui('disable-offline').disabled=false;}});
+ui('disable-offline').addEventListener('click',async()=>{ui('disable-offline').disabled=true;try{const reg=await navigator.serviceWorker.getRegistration(appRoot.href);if(reg && reg.scope===appRoot.href)await reg.unregister();for(const key of await caches.keys())if(key.startsWith('randomisera-offline-'))await caches.delete(key);remember({offlineRequested:false});offlineState(false);pwaMessage('Offlinefilerna är borttagna. Starta om appen för att avsluta offlineläget helt.');}catch{pwaMessage('Kunde inte ta bort offlinefilerna. Försök igen.','error');}finally{ui('disable-offline').disabled=false;}});
 if(standalone()){
   // Opening the installed app expresses the request for its advertised offline feature.
   if(preferences.offlineRequested!==false)remember({installed:true,offlineRequested:true});
@@ -72,7 +73,7 @@ if(standalone()){
 }
 if(supported)cached().then(enabled=>{
   offlineState(enabled);
-  if(enabled)ui('offline-status').textContent='Offlinefiler finns sparade på den här enheten.';
+  if(enabled)pwaMessage('Offlinefiler finns sparade på den här enheten.');
   else if(preferences.offlineRequested===true)enableOffline();
 }).catch(()=>{});
 updateInstall();
