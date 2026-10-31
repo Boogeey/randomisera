@@ -9,6 +9,7 @@
 <meta name="theme-color" content="#FCFCFA" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#191F1B" media="(prefers-color-scheme: dark)">
 <link rel="stylesheet" href="../assets/style.css">
+<link rel="manifest" href="../manifest.webmanifest"><link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png"><link rel="icon" href="../assets/icons/favicon.ico">
 </head>
 <body data-mode="names" data-name-page="true">
 <a class="skip" href="#main">Hoppa till innehållet</a>
@@ -32,7 +33,8 @@
 <section class="result" aria-labelledby="result-title"><div class="result-head"><h2 id="result-title">Ditt resultat</h2><button id="copy" class="secondary" disabled>Kopiera</button></div><div id="output" aria-live="polite" aria-atomic="true"><p class="empty">Här dyker resultatet upp.</p></div><div class="result-foot"><p class="note" id="status">Redo när du är.</p><button type="button" id="reset" class="secondary">Återställ urvalet</button></div></section>
 </div>
 <section id="history" class="history" aria-labelledby="history-title" hidden><h2 id="history-title">Tidigare dragningar</h2><ol id="history-list" reversed></ol><div class="history-actions"><button type="button" id="copy-history">Kopiera alla</button><button type="button" id="clear-history">Rensa historik</button></div><p class="note">Historiken försvinner när sidan laddas om eller stängs.</p></section>
-<noscript><p>Aktivera JavaScript för att använda verktyget.</p></noscript></main><footer><a class="site-name" href="../">randomisera.se</a><p>Allt slumpas i din webbläsare.</p></footer>
+<noscript><p>Aktivera JavaScript för att använda verktyget.</p></noscript></main><footer><a class="site-name" href="../">randomisera.se</a><p>Allt slumpas i din webbläsare.</p><div class="install-tools"><button type="button" id="install-toggle" aria-expanded="false" aria-controls="install-panel">Lägg till på hemskärmen</button><div id="install-panel" hidden><p id="install-help"></p><button type="button" id="install-app" hidden>Installera Randomisera</button><p>Spara verktygets filer för att kunna använda det utan internet. Namnlistor och resultat sparas inte.</p><button type="button" id="enable-offline">Gör tillgänglig offline</button><button type="button" id="disable-offline" hidden>Ta bort offlinefiler</button><p id="offline-status" role="status"></p></div></div></footer>
 <script src="../assets/app.js" defer></script>
+<script src="../assets/pwa.js" defer></script>
 </body>
 </html>
