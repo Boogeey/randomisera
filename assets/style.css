@@ -94,3 +94,5 @@ footer p { margin: 5px 0 0; }
   .result { padding: 16px; }
   .result-foot { flex-wrap: wrap; }
 }
+
+.history{margin-top:28px}.history h2{font-size:16px;font-weight:600;margin:0 0 12px}.history ol{margin:0 0 16px;padding-left:30px;max-height:320px;overflow:auto;overflow-wrap:anywhere}.history li{padding:7px 0 7px 4px;line-height:1.6;white-space:pre-wrap}.history li::marker{color:var(--muted)}.history-actions{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}

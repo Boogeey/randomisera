@@ -13,7 +13,7 @@
 <body data-mode="decide">
 <a class="skip" href="#main">Hoppa till innehållet</a>
 <main id="main">
-<nav aria-label="Verktyg" id="tools"><a href="../slumpa-namn/">Namn</a><a href="../slumpa-nummer/">Nummer</a><a href="../dela-in-i-grupper/">Grupper</a><a href="../slumpa-lista/">Lista</a><a href="../singla-slant/" aria-current="page">Slant</a></nav>
+<nav aria-label="Verktyg" id="tools"><a href="../">Välj</a><a href="../slumpa-nummer/">Nummer</a><a href="../dela-in-i-grupper/">Grupper</a><a href="../slumpa-lista/">Lista</a><a href="../singla-slant/" aria-current="page">Slant</a></nav>
 <h1>Singla slant online – krona eller klave</h1>
 <div class="workspace">
 <form id="form" aria-labelledby="title" aria-describedby="help">
@@ -28,8 +28,9 @@
 <button type="submit" class="primary" id="submit">Slumpa</button>
 
 </form>
-<section class="result" aria-labelledby="result-title"><div class="result-head"><h2 id="result-title">Ditt resultat</h2><button id="copy" class="secondary" disabled>Kopiera</button></div><div id="output" aria-live="polite" aria-atomic="true"><p class="empty">Här dyker resultatet upp.</p></div><div class="result-foot"><p class="note" id="status">Redo när du är.</p><button type="button" id="reset" class="secondary" hidden>Återställ dragningen</button></div></section>
+<section class="result" aria-labelledby="result-title"><div class="result-head"><h2 id="result-title">Ditt resultat</h2><button id="copy" class="secondary" disabled>Kopiera</button></div><div id="output" aria-live="polite" aria-atomic="true"><p class="empty">Här dyker resultatet upp.</p></div><div class="result-foot"><p class="note" id="status">Redo när du är.</p><button type="button" id="reset" class="secondary" hidden>Återställ urvalet</button></div></section>
 </div>
+<section id="history" class="history" aria-labelledby="history-title" hidden><h2 id="history-title">Tidigare dragningar</h2><ol id="history-list" reversed></ol><div class="history-actions"><button type="button" id="copy-history">Kopiera alla</button><button type="button" id="clear-history">Rensa historik</button></div><p class="note">Historiken försvinner när sidan laddas om eller stängs.</p></section>
 <noscript><p>Aktivera JavaScript för att använda verktyget.</p></noscript></main><footer><a class="site-name" href="../">randomisera.se</a><p>Allt slumpas i din webbläsare.</p></footer>
 <script src="../assets/app.js" defer></script>
 </body>
