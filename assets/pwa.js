@@ -2,19 +2,40 @@
 const appRoot = new URL('../', document.currentScript.src);
 const ui = id => document.getElementById(id);
 let installPrompt = null;
+const storageKey='randomisera-pwa-preferences';
+function readPreferences(){try{return JSON.parse(localStorage.getItem(storageKey))||{};}catch{return {};}}
+let preferences=readPreferences();
+function remember(changes){preferences={...preferences,...changes};try{localStorage.setItem(storageKey,JSON.stringify(preferences));}catch{}}
+
 const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 const apple = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 function updateInstall(){
   ui('install-app').hidden = !installPrompt || standalone();
-  ui('install-toggle').textContent = standalone() ? 'Offlineinställningar' : 'Lägg till på hemskärmen';
+  ui('install-help').hidden=standalone();
+  ui('install-explanation').hidden=standalone();
+  const installed=standalone()||preferences.installed===true;
+  ui('install-toggle').hidden=installed;
+  ui('app-settings').hidden=!installed;
   ui('install-help').textContent = standalone() ? 'Du använder Randomisera som app.' : installPrompt ? 'Installera Randomisera för snabb åtkomst från hemskärmen.' : apple ? 'Öppna sidan i Safari. Tryck på Dela och välj Lägg till på hemskärmen. Välj Öppna som webbapp om det visas och tryck på Lägg till.' : 'Öppna webbläsarens meny och välj Installera app eller Lägg till på startskärmen, om alternativet finns.';
 }
-window.addEventListener('beforeinstallprompt', event => {event.preventDefault();installPrompt=event;updateInstall();});
-window.addEventListener('appinstalled',()=>{installPrompt=null;updateInstall();});
-ui('install-toggle').addEventListener('click',()=>{const open=ui('install-panel').hidden;ui('install-panel').hidden=!open;ui('install-toggle').setAttribute('aria-expanded',String(open));});
+window.addEventListener('beforeinstallprompt', event => {event.preventDefault();installPrompt=event;remember({installed:false});updateInstall();});
+window.addEventListener('appinstalled',()=>{installPrompt=null;remember({installed:true});updateInstall();});
+function togglePanel(){const open=ui('install-panel').hidden;ui('install-panel').hidden=!open;for(const id of ['install-toggle','app-settings'])ui(id).setAttribute('aria-expanded',String(open));}
+ui('install-toggle').addEventListener('click',()=>{
+  togglePanel();
+  if(ui('install-panel').hidden)return;
+  remember({offlineRequested:true});
+  if(supported)enableOffline();
+  if(installPrompt)ui('install-app').click();
+});
+ui('app-settings').addEventListener('click',togglePanel);
 ui('install-app').addEventListener('click',async()=>{if(!installPrompt)return;const prompt=installPrompt;installPrompt=null;updateInstall();try{await prompt.prompt();await prompt.userChoice;}catch{ui('install-help').textContent='Använd webbläsarens meny för att lägga till appen.';}});
 const supported = 'serviceWorker' in navigator && 'caches' in window && window.isSecureContext;
-function offlineState(enabled){ui('enable-offline').hidden=enabled;ui('disable-offline').hidden=!enabled;}
+function offlineState(enabled){
+  ui('enable-offline').hidden=enabled;
+  ui('enable-offline').textContent='Aktivera offline';
+  ui('disable-offline').hidden=!enabled;
+}
 async function cached(){
   for(const key of await caches.keys()){
     if(!key.startsWith('randomisera-offline-'))continue;
@@ -25,7 +46,9 @@ async function cached(){
 }
 ui('enable-offline').disabled=!supported;
 if(!supported)ui('offline-status').textContent='Offlinefunktionen kräver HTTPS och en webbläsare med stöd för offlinefiler.';
-ui('enable-offline').addEventListener('click',async()=>{
+let savingOffline=false;
+async function enableOffline(){
+  if(savingOffline)return; savingOffline=true;
   ui('enable-offline').disabled=true;ui('offline-status').textContent='Sparar verktygets filer…';
   try{
     const registration=await navigator.serviceWorker.register(new URL('sw.js',appRoot),{scope:appRoot.href});
@@ -37,9 +60,19 @@ ui('enable-offline').addEventListener('click',async()=>{
       worker.addEventListener('statechange',check);check();
     });
     if(!await cached())throw Error('cache');offlineState(true);ui('offline-status').textContent='Klart! Verktygen kan nu användas utan internet. Webbläsaren kan rensa filerna om lagringsutrymmet behövs.';
-  }catch{ui('offline-status').textContent='Kunde inte spara offlinefilerna. Kontrollera anslutningen och försök igen.';}
-  finally{ui('enable-offline').disabled=false;}
-});
-ui('disable-offline').addEventListener('click',async()=>{ui('disable-offline').disabled=true;try{const reg=await navigator.serviceWorker.getRegistration(appRoot.href);if(reg && reg.scope===appRoot.href)await reg.unregister();for(const key of await caches.keys())if(key.startsWith('randomisera-offline-'))await caches.delete(key);offlineState(false);ui('offline-status').textContent='Offlinefilerna är borttagna. Starta om appen för att avsluta offlineläget helt.';}catch{ui('offline-status').textContent='Kunde inte ta bort offlinefilerna. Försök igen.';}finally{ui('disable-offline').disabled=false;}});
-if(supported)cached().then(enabled=>{offlineState(enabled);if(enabled)ui('offline-status').textContent='Offlinefiler finns sparade på den här enheten.';}).catch(()=>{});
+  }catch{ui('enable-offline').hidden=false;ui('enable-offline').textContent='Försök igen';ui('offline-status').textContent='Kunde inte spara offlinefilerna. Kontrollera anslutningen och försök igen.';}
+  finally{ui('enable-offline').disabled=false;savingOffline=false;}
+}
+ui('enable-offline').addEventListener('click',()=>{remember({offlineRequested:true});enableOffline();});
+ui('disable-offline').addEventListener('click',async()=>{ui('disable-offline').disabled=true;try{const reg=await navigator.serviceWorker.getRegistration(appRoot.href);if(reg && reg.scope===appRoot.href)await reg.unregister();for(const key of await caches.keys())if(key.startsWith('randomisera-offline-'))await caches.delete(key);remember({offlineRequested:false});offlineState(false);ui('offline-status').textContent='Offlinefilerna är borttagna. Starta om appen för att avsluta offlineläget helt.';}catch{ui('offline-status').textContent='Kunde inte ta bort offlinefilerna. Försök igen.';}finally{ui('disable-offline').disabled=false;}});
+if(standalone()){
+  // Opening the installed app expresses the request for its advertised offline feature.
+  if(preferences.offlineRequested!==false)remember({installed:true,offlineRequested:true});
+  else remember({installed:true});
+}
+if(supported)cached().then(enabled=>{
+  offlineState(enabled);
+  if(enabled)ui('offline-status').textContent='Offlinefiler finns sparade på den här enheten.';
+  else if(preferences.offlineRequested===true)enableOffline();
+}).catch(()=>{});
 updateInstall();

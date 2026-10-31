@@ -1,7 +1,7 @@
 'use strict';
 // Change this version when publishing changes to cached files.
-const CACHE = 'randomisera-offline-v1';
-const FILES = ['./','slumpa-namn/','slumpa-nummer/','dela-in-i-grupper/','slumpa-lista/','singla-slant/','assets/style.css','assets/app.js','assets/pwa.js','manifest.webmanifest','assets/icons/icon-192.png','assets/icons/icon-512.png','assets/icons/icon-maskable-512.png','assets/icons/apple-touch-icon.png','assets/icons/favicon.ico'];
+const CACHE = 'randomisera-offline-v2';
+const FILES = ['./','slumpa-nummer/','dela-in-i-grupper/','slumpa-lista/','singla-slant/','lagring-och-integritet/','assets/style.css','assets/app.js','assets/pwa.js','assets/saved-lists.js','manifest.webmanifest','assets/icons/icon-192.png','assets/icons/icon-512.png','assets/icons/icon-maskable-512.png','assets/icons/apple-touch-icon.png','assets/icons/favicon.ico'];
 const urls = FILES.map(file=>new URL(file,self.registration.scope).href);
 self.addEventListener('install',event=>event.waitUntil((async()=>{const cache=await caches.open(CACHE);await cache.addAll(urls.map(url=>new Request(url,{cache:'reload'})));})()));
 // Do not replace an active worker mid-session; new versions activate after old tabs close.
