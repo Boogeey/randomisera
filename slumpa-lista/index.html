@@ -6,30 +6,31 @@
 <meta name="description" content="Blanda en lista och få en slumpmässig ordning. Slumpa turordning för presentationer, aktiviteter och andra alternativ.">
 <link rel="canonical" href="https://randomisera.se/slumpa-lista/">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#f3f6fc" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#111a2a" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FCFCFA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#191F1B" media="(prefers-color-scheme: dark)">
 <link rel="stylesheet" href="../assets/style.css">
 </head>
 <body data-mode="list">
 <a class="skip" href="#main">Hoppa till innehållet</a>
-<header><a href="../" class="brand">randomisera<span>.se</span></a></header>
-<main id="main"><h1>Slumpa ordningen i en lista</h1>
-<nav aria-label="Verktyg" id="tools"><a href="../slumpa-namn/">Slumpa namn</a><a href="../slumpa-nummer/">Slumpa nummer</a><a href="../dela-in-i-grupper/">Dela in i grupper</a><a href="../slumpa-lista/" aria-current="page">Slumpa lista</a><a href="../singla-slant/">Singla slant</a></nav>
+<main id="main">
+<nav aria-label="Verktyg" id="tools"><a href="../slumpa-namn/">Namn</a><a href="../slumpa-nummer/">Nummer</a><a href="../dela-in-i-grupper/">Grupper</a><a href="../slumpa-lista/" aria-current="page">Lista</a><a href="../singla-slant/">Slant</a></nav>
+<h1>Slumpa ordningen i en lista</h1>
 <div class="workspace">
 <form id="form" aria-labelledby="title" aria-describedby="help">
 <h2 id="title" class="sr-only">Blanda en lista</h2><p class="help" id="help">Skriv ett alternativ per rad och få en slumpad ordning.</p>
-<div id="listFields"><label for="entries" id="listLabel">Namn, ett per rad</label><textarea id="entries" placeholder="Alex&#10;Kim&#10;Sam&#10;Robin" maxlength="100000"></textarea><label class="check" id="removeDuplicatesLabel"><input type="checkbox" id="dedupe" checked>Ta bort identiska rader</label></div>
+<div id="listFields"><label for="entries" id="listLabel">Namn, ett per rad</label><textarea id="entries" placeholder="Alex&#10;Kim&#10;Sam&#10;Robin" maxlength="100000"></textarea></div>
 <div id="numberFields" hidden><div class="row"><div><label for="min">Från</label><input id="min" type="number" value="1" min="-1000000000" max="1000000000" required></div><div><label for="max">Till</label><input id="max" type="number" value="100" min="-1000000000" max="1000000000" required></div></div></div>
 <div id="countFields" hidden><label for="count" id="countLabel">Antal namn att dra</label><input id="count" type="number" min="1" max="1000" value="1" required></div>
 <label class="check" id="uniqueLabel" hidden><input id="unique" type="checkbox" checked>Utan upprepningar</label>
+<label class="check" id="removeDuplicatesLabel"><input type="checkbox" id="dedupe" checked>Ta bort identiska rader</label>
 <div id="decisionFields" hidden><label for="decision">Välj typ</label><select id="decision"><option value="coin">Singla slant</option><option value="yes">Ja eller nej</option><option value="dice">Kasta en tärning</option></select></div>
 <p id="error" class="error" role="alert" hidden></p>
 <button type="submit" class="primary" id="submit">Blanda en lista</button>
-<button type="button" id="reset" class="secondary" style="margin-top:12px" hidden>Återställ dragningen</button>
+
 </form>
-<section class="result" aria-labelledby="result-title"><div class="result-head"><h2 id="result-title">Ditt resultat</h2><button id="copy" class="secondary" disabled>Kopiera</button></div><div id="output" aria-live="polite" aria-atomic="true"><p class="empty">Här dyker resultatet upp.</p></div><p class="note" id="status">Redo när du är.</p></section>
+<section class="result" aria-labelledby="result-title"><div class="result-head"><h2 id="result-title">Ditt resultat</h2><button id="copy" class="secondary" disabled>Kopiera</button></div><div id="output" aria-live="polite" aria-atomic="true"><p class="empty">Här dyker resultatet upp.</p></div><div class="result-foot"><p class="note" id="status">Redo när du är.</p><button type="button" id="reset" class="secondary" hidden>Återställ dragningen</button></div></section>
 </div>
-<noscript><p>Aktivera JavaScript för att använda verktyget.</p></noscript></main><footer>Allt slumpas i din webbläsare.</footer>
+<noscript><p>Aktivera JavaScript för att använda verktyget.</p></noscript></main><footer><a class="site-name" href="../">randomisera.se</a><p>Allt slumpas i din webbläsare.</p></footer>
 <script src="../assets/app.js" defer></script>
 </body>
 </html>
