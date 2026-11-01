@@ -2,7 +2,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
-const {transformSync} = require('esbuild');
+const {transformSync, buildSync} = require('esbuild');
+const {renderListPages} = require('./list-pages.cjs');
 const {minify} = require('html-minifier-terser');
 async function minifyFile(file,data) {
   const extension=path.extname(file);
@@ -17,6 +18,7 @@ async function minifyFile(file,data) {
 }
 async function build(root = path.resolve(__dirname,'..')) {
   root = fs.realpathSync(root);
+  const listPages = renderListPages(root);
   const template = fs.readFileSync(path.join(root,'sw.js'),'utf8');
   const match = template.match(/const FILES = (\[[\s\S]*?\]);/);
   if (!match) throw Error('sw.js must define FILES as a JSON array.');
@@ -30,8 +32,12 @@ async function build(root = path.resolve(__dirname,'..')) {
     if (!resolved.startsWith(root+path.sep) || !fs.realpathSync(resolved).startsWith(root+path.sep)) throw Error('Offline path escapes the site: '+file);
     const stat = fs.statSync(resolved);
     if (!stat.isFile()) throw Error('Offline file is missing: '+file);
-    const original=fs.readFileSync(resolved);sourceBytes+=original.length;
-    bytes.set(file,await minifyFile(file,original));
+    const original=Buffer.from(listPages.get(file.replace(/^\.\//,'')) ?? fs.readFileSync(resolved));sourceBytes+=original.length;
+    if (file === 'assets/app.js') {
+      const bundled = buildSync({entryPoints:[resolved],bundle:true,write:false,metafile:true,platform:'browser',format:'iife',minify:true,charset:'utf8',legalComments:'inline',target:['safari15','chrome100','firefox100']});
+      for (const [input,info] of Object.entries(bundled.metafile.inputs)) if (path.resolve(input) !== resolved) sourceBytes += info.bytes;
+      bytes.set(file,Buffer.from(bundled.outputFiles[0].contents));
+    } else bytes.set(file,await minifyFile(file,original));
   }
   const token='randomisera-offline-BUILD_HASH';
   const workerTemplate=(await minifyFile('sw.js',Buffer.from(template.replace(/const CACHE = '[^']+';/,"const CACHE = '"+token+"';")))).toString('utf8');

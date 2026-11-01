@@ -14,23 +14,28 @@ List tools use a two-step flow. Preparation contains the list and settings; a su
 
 ## Development
 
-`assets/app.js` shares the preparation/presentation flow across tool pages. Number generation, list generation, quick choices, result formatting, and rendering are separate functions. Each page includes only its own inputs; list submodes share one editor. Legacy addresses remain available, and local list/offline storage formats are unchanged.
+See the [architecture decision records](docs/adr/README.md) for the reasons behind the main technical choices and [product principles](docs/Product-principles.md) for the agreed product direction.
 
-Edit the HTML and the shared files in `assets/`. Open `index.html` directly for basic preview, or use a localhost server for shared local storage and PWA testing. This machine's `start-local.cmd` is local-only and excluded from Git.
+`assets/app.js` coordinates tool input and the preparation/presentation flow. Local modules separate calculations, workspace state, storage, result rendering, and knockout behavior. esbuild bundles them into a single browser script. See [Architecture](docs/Architecture.md) for module responsibilities and storage compatibility.
+
+Edit `templates/list-tool.html` for the shared list UI and run `npm run generate` to refresh its three generated pages. Other pages remain directly editable HTML. Use `npm run dev` to build and preview the site locally; source JavaScript must be bundled before it runs in a browser.
 
 Run the automated checks and create the deployment folder with Node.js 22 or newer:
 
 ```sh
 npm ci --ignore-scripts
+npm run generate
 npm test
 npm run build
+npx playwright install chromium
+npm run test:browser
 ```
 
 The build creates `_site/`, containing only public website files. It generates a deterministic cache ID from the final minified offline assets and service worker. **Do not increment cache versions manually.** `_site/` is not committed.
 
 ## Publication
 
-The workflow in `.github/workflows/pages.yml` tests, builds, and deploys `_site/` on pushes to `main`.
+The workflow in `.github/workflows/pages.yml` runs unit tests, builds, runs desktop/mobile browser tests, and deploys `_site/` on pushes to `main`. Browser failures retain screenshots and traces.
 
 **One-time setup:** in the repository's **Settings → Pages → Build and deployment**, choose **GitHub Actions** as the source. Keep the existing custom domain. See the [publication and PWA guide](docs/Publication.md).
 
@@ -64,9 +69,9 @@ The separate `randomisera-pwa-preferences` key stores only the offline choice, n
 
 ## Publication minification
 
-Source files remain readable and are never overwritten by the build. esbuild minifies JavaScript (including the service worker) and CSS; html-minifier-terser minifies HTML conservatively, preserving quoted attributes and optional tags. The web app manifest is compact JSON. Legal JavaScript/CSS notices are retained. No minifier or node_modules files are shipped to visitors, and no source maps are published.
+Source files remain readable and are never overwritten by the publication build. List HTML is rendered from its shared template. esbuild bundles local controller modules and minifies JavaScript (including the service worker) and CSS; html-minifier-terser minifies HTML conservatively, preserving quoted attributes and optional tags. The web app manifest is compact JSON. Legal JavaScript/CSS notices are retained. No minifier or node_modules files are shipped to visitors, and no source maps are published.
 
-Run `npm ci --ignore-scripts` once after checkout or dependency changes, then `npm test` and `npm run build`. GitHub Actions performs these steps automatically using the pinned package-lock.json. Build tools are development dependencies only. Formatting-only changes that produce identical output do not change the cache ID.
+Run `npm ci --ignore-scripts` once after checkout or dependency changes, then `npm test` and `npm run build`. GitHub Actions performs these steps automatically using the pinned package-lock.json. Build and browser test tools are development dependencies only. Formatting-only changes that produce identical output do not change the cache ID.
 
 ## Knockout tournaments from groups
 

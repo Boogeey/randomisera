@@ -1,0 +1,104 @@
+const {test, expect} = require('@playwright/test');
+const names = ['Anna', 'Bo', 'Cecilia', 'David', 'Eva', 'Filip', 'Greta', 'Hugo', 'Ida', 'Johan', 'Karin', 'Lars', 'Maria', 'Nils'];
+const groupMembers = page => page.locator('#output .group-result ul').allTextContents();
+
+test('list and grouping settings survive real page navigation; returning does not focus an input', async ({page}) => {
+  await page.goto('/#gruppera');
+  await page.locator('#entries').fill(names.join('\n'));
+  await expect(page.locator('#group-method')).toHaveValue('size');
+  await expect(page.locator('#count')).toHaveValue('4');
+  await page.getByRole('link', {name: 'Nummer', exact: true}).click();
+  await page.getByRole('link', {name: 'Listverktyg', exact: true}).click();
+  await expect(page.locator('#entries')).toHaveValue(names.join('\n'));
+  await page.locator('#submit').click();
+  await expect(page.locator('#output .group-result')).toHaveCount(4);
+  await page.locator('#edit-draw').click();
+  await expect(page.locator('#main')).toBeFocused();
+  await expect(page.locator('#entries')).not.toBeFocused();
+});
+
+test('legacy drafts retain group counts while new sessions default to maximum size', async ({page}) => {
+  await page.addInitScript(() => sessionStorage.setItem('randomisera-list-draft-v1', JSON.stringify({version: 1, text: 'A\nB\nC\nD\nE\nF\nG\nH\nI\nJ', mode: 'groups', counts: {choose: 1, groups: 2}, unique: true, active: null})));
+  await page.goto('/');
+  await expect(page.locator('#group-method')).toHaveValue('groups');
+  await expect(page.locator('#count')).toHaveValue('2');
+  await page.locator('#submit').click();
+  await expect(page.locator('#output .group-result')).toHaveCount(2);
+});
+
+test('saved lists can be saved, loaded and updated without automatic overwrite', async ({page}) => {
+  await page.goto('/');
+  await page.locator('#entries').fill('Anna\nBo');
+  await page.locator('#open-save').click();
+  await page.locator('#list-name').fill('Test list');
+  await page.locator('#save-list').click();
+  await page.locator('#entries').fill('Anna\nBo\nCecilia');
+  await page.reload();
+  await expect(page.locator('#entries')).toHaveValue('Anna\nBo\nCecilia');
+  await expect(page.locator('#update-list')).toBeEnabled();
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('randomisera-saved-lists-v1')).lists[0].entries);
+  expect(stored).toEqual(['Anna', 'Bo']);
+  await page.locator('#update-list').click();
+  await page.getByRole('link', {name: 'Nummer', exact: true}).click();
+  await page.getByRole('link', {name: 'Listverktyg', exact: true}).click();
+  await expect(page.locator('#update-list')).toBeDisabled();
+});
+
+test('tournament preserves exact teams and winners; regrouping resets it', async ({page}) => {
+  await page.goto('/#gruppera');
+  await page.locator('#entries').fill(names.join('\n'));
+  await page.locator('#submit').click();
+  const original = await groupMembers(page);
+  await page.locator('#tournament-start').click();
+  await page.locator('#match-output button').first().click();
+  const winner = await page.locator('#match-output button[aria-pressed="true"]').getAttribute('aria-label');
+  await page.locator('#match-back').click();
+  expect(await groupMembers(page)).toEqual(original);
+  await page.locator('#tournament-start').click();
+  await expect(page.locator('#match-output button[aria-pressed="true"]')).toHaveAttribute('aria-label', winner);
+  await page.locator('#match-back').click();
+  await page.locator('#next-draw').click();
+  await page.locator('#tournament-start').click();
+  await expect(page.locator('#match-output button[aria-pressed="true"]')).toHaveCount(0);
+});
+
+test('dice locking works with keyboard and disables rerolls when all are locked', async ({page}) => {
+  await page.goto('/singla-slant/#tarning');
+  await page.locator('#dice-count').fill('3');
+  await page.locator('#submit').click();
+  const first = page.locator('.die-button').first();
+  const value = await first.textContent();
+  await first.focus();
+  await page.keyboard.press('Space');
+  await expect(first).toHaveAttribute('aria-pressed', 'true');
+  await page.locator('#next-draw').click();
+  await expect(first).toHaveText(value);
+  await page.locator('.die-button').nth(1).click();
+  await page.locator('.die-button').nth(2).click();
+  await expect(page.locator('#next-draw')).toBeDisabled();
+  await page.locator('#unlock-dice').click();
+  await expect(page.locator('#next-draw')).toBeEnabled();
+});
+
+test('presentation counter changes even for identical values and reduced motion skips animation', async ({page}) => {
+  await page.emulateMedia({reducedMotion: 'reduce'});
+  await page.goto('/slumpa-nummer/');
+  await page.locator('#min').fill('42');
+  await page.locator('#max').fill('42');
+  await page.locator('#submit').click();
+  await page.locator('#next-draw').click();
+  await expect(page.locator('#draw-counter')).toHaveText('Slumpning 2');
+  await expect(page.locator('#output')).toHaveText('42');
+  expect(await page.locator('#output').evaluate(node => node.getAnimations({subtree: true}).length)).toBe(0);
+});
+
+test('all published pages load without runtime errors or horizontal overflow', async ({page}) => {
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  for (const route of ['/', '/dela-in-i-grupper/', '/slumpa-lista/', '/slumpa-nummer/', '/singla-slant/', '/app/', '/lagring-och-integritet/']) {
+    await page.goto(route);
+    await expect(page.locator('h1').first()).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  }
+  expect(errors).toEqual([]);
+});

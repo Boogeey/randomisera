@@ -35,7 +35,7 @@ test('unsupported counts are rejected and match assets are included in the offli
   assert.throws(()=>core.tournament(Array.from({length:33},(_,i)=>String(i))));
   const fs=require('node:fs'),path=require('node:path'),root=path.resolve(__dirname,'..');
   const worker=fs.readFileSync(path.join(root,'sw.js'),'utf8');
-  for(const file of ['assets/matches-core.js','assets/matches.js']) {
+  for(const file of ['assets/app.js']) {
     assert(worker.includes(JSON.stringify(file)));
     assert(fs.existsSync(path.join(root,file.endsWith('/')?file+'index.html':file)));
   }

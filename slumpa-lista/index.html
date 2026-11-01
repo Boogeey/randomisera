@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- Generated from templates/list-tool.html. Run npm run generate; do not edit the generated pages. -->
 <html lang="sv">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -20,11 +21,11 @@
 <h1>Låt slumpen avgöra</h1>
 <p class="intro">Lägg in din lista och välj vad du vill göra.</p>
 <div class="mode-switch" role="group" aria-label="Vad vill du göra?">
-<button type="button" data-list-mode="choose" aria-pressed="false">Välj</button>
+<button type="button" data-list-mode="choose" aria-pressed="true">Välj</button>
 <button type="button" data-list-mode="groups" aria-pressed="false">Gruppera</button>
-<button type="button" data-list-mode="list" aria-pressed="true">Blanda</button>
+<button type="button" data-list-mode="list" aria-pressed="false">Blanda</button>
 </div>
-<p class="help" id="help" aria-live="polite">Slumpa en turordning, presentationsordning eller spellista.</p>
+<p class="help" id="help" aria-live="polite">Välj en vinnare, kvällens film eller vem som börjar.</p>
 <div class="workspace">
 
 <form id="form" aria-labelledby="title" aria-describedby="help">
@@ -58,6 +59,7 @@
 <div class="presentation-caption"><h2 id="result-title" tabindex="-1">Slumpen valde</h2><p id="draw-counter" class="draw-counter" aria-hidden="true"></p></div><div class="presentation-stage"><div id="output"></div><p class="note" id="status">Redo när du är.</p></div>
 <div class="presentation-actions"><button type="button" id="next-draw" class="primary">Välj nästa</button><p id="tournament-warning" class="note" hidden>Lagen har olika många deltagare. Du kan ändå skapa ett slutspel.</p><button type="button" id="tournament-start" hidden>Skapa slutspel med lagen</button></div>
 <details id="history" class="history" hidden><summary id="history-title">Visa historik</summary><ol id="history-list" reversed></ol><div class="history-actions"><button type="button" id="copy-history">Kopiera alla</button><button type="button" id="clear-history">Rensa historik</button></div><p class="note">Historiken försvinner när sidan laddas om eller stängs.</p><button type="button" id="reset" class="secondary">Börja ny omgång</button></details></div></section>
+
 <section id="match-presentation" aria-labelledby="match-title" hidden>
 <div class="presentation-topbar"><button type="button" id="match-back">‹ Tillbaka till lagen</button><span class="presentation-brand">randomisera.se</span><button type="button" id="match-copy">Kopiera slutspel</button></div>
 <div class="presentation-content"><p id="match-origin" class="note"></p><div class="presentation-caption"><h2 id="match-title" tabindex="-1">Slutspel</h2><p id="match-counter" class="draw-counter"></p></div><div class="match-stage"><div id="match-output" class="knockout-round"></div></div>
@@ -66,9 +68,6 @@
 <p id="match-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
 <noscript><p>Aktivera JavaScript för att använda verktyget.</p></noscript></main><footer><div class="footer-links"><a class="contact-link" href="mailto:feedback.randomisera@outlook.com">Kontakt</a><span aria-hidden="true">·</span><a class="privacy-link" href="../lagring-och-integritet/index.html">Lagring och integritet</a><span aria-hidden="true">·</span><a class="app-link" href="../app/index.html">App</a></div></footer>
 <script src="../assets/app.js" defer></script>
-<script src="../assets/matches-core.js" defer></script>
-<script src="../assets/matches.js" defer></script>
 <script src="../assets/pwa.js" defer></script>
-<script src="../assets/saved-lists.js" defer></script>
 </body>
 </html>

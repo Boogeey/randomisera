@@ -27,6 +27,19 @@ jobs:
         run: node --test tests/*.test.cjs
       - name: Build static website and cache ID
         run: node scripts/build-site.cjs
+      - name: Install browser for interaction tests
+        run: npx playwright install --with-deps chromium
+      - name: Test desktop and mobile interactions
+        run: npm run test:browser
+      - name: Keep browser diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-test-results
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:

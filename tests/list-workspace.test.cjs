@@ -5,7 +5,11 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 const root=path.resolve(__dirname,'..');
-const code=fs.readFileSync(path.join(root,'assets/app.js'),'utf8');
+const {buildSync}=require('esbuild');
+const source=fs.readFileSync(path.join(root,'assets/app.js'),'utf8')
+  .replace('const state = createWorkspaceState();','const state = createWorkspaceState(); window.__testState = state;')
+  .replace('if (isListTool) savedLists = initSavedLists(', 'if (isListTool) window.__initLists = () => savedLists = initSavedLists(');
+const code=buildSync({stdin:{contents:source,resolveDir:path.join(root,'assets')},bundle:true,write:false,platform:'browser',format:'iife'}).outputFiles[0].text;
 
 function harness(initial='choose',hash='',draftStore=null,savedStore=new Map(),blocked=false,reducedMotion=false,groupMethod='groups'){
   const nodes={},windowEvents={};
@@ -27,15 +31,19 @@ function harness(initial='choose',hash='',draftStore=null,savedStore=new Map(),b
   const window={location:{hash},confirm:()=>true,matchMedia:()=>({matches:reducedMotion}),history:{pushState(_,__,value){window.location.hash=value;}},addEventListener(k,f){windowEvents[k]=f;},scrollTo(){}};
   const storage=store=>({getItem(key){if(blocked)throw Error('blocked');return store.get(key)??null;},setItem(key,value){if(blocked)throw Error('blocked');store.set(key,value);}});
   const queryAll=selector=>selector==='[data-decision-mode]'?decisionButtons:selector==='[data-list-mode]'?buttons:[];
-  const context=vm.createContext({document:{body,getElementById:id=>nodes[id]||null,createElement:element,querySelectorAll:queryAll},window,sessionStorage:storage(draftStore||new Map()),localStorage:storage(savedStore),crypto:require('node:crypto').webcrypto,Event:class{constructor(type){this.type=type;}}});
+  const context=vm.createContext({document:{body,getElementById:id=>nodes[id]||null,createElement:element,querySelectorAll:queryAll},window,sessionStorage:storage(draftStore||new Map()),localStorage:storage(savedStore),navigator:{},crypto:{getRandomValues:array=>require('node:crypto').webcrypto.getRandomValues(array)},Event:class{constructor(type){this.type=type;}}});
   vm.runInContext(code,context);
   // Existing group-count scenarios explicitly select that method.
-  if(nodes['group-method']&&groupMethod){nodes['group-method'].value=groupMethod;if(vm.runInContext('mode',context)==='groups')nodes['group-method'].dispatchEvent({type:'change'});else vm.runInContext('groupingMethod='+JSON.stringify(groupMethod),context);}
-  if(draftStore)vm.runInContext(fs.readFileSync(path.join(root,'assets/saved-lists.js'),'utf8'),context);
+  if(nodes['group-method']&&groupMethod){nodes['group-method'].value=groupMethod;if(vm.runInContext('window.__testState.mode',context)==='groups')nodes['group-method'].dispatchEvent({type:'change'});else vm.runInContext('window.__testState.groupingMethod='+JSON.stringify(groupMethod),context);}
+  if(draftStore)window.__initLists();
   const input=text=>{nodes.entries.value=text;nodes.entries.dispatchEvent({type:'input'});};
   const switchTo=mode=>buttons.find(b=>b.dataset.listMode===mode).click();
   const submit=()=>nodes.form.dispatchEvent({type:'submit',preventDefault(){}});
-  return {nodes,buttons,decisionButtons,window,windowEvents,input,switchTo,submit,run:s=>vm.runInContext(s,context)};
+  return {nodes,buttons,decisionButtons,window,windowEvents,input,switchTo,submit,run:s=>{
+    const fixed=s.match(/^randomInt=\(\)=>?(\d+)$/);
+    if(fixed){context.crypto.getRandomValues=array=>{array.fill(Number(fixed[1]));return array;};return;}
+    return vm.runInContext(s.replace(/\b(mode|decisionMode|modeCounts|groupingMethod|groupSize|resultHistory|drawn|lastText|drawNumber|diceValues|lockedDice)\b/g,'window.__testState.$1'),context);
+  }};
 }
 
 test('one list and count settings survive mode changes while previous rounds reset',()=>{
@@ -251,8 +259,6 @@ test('dice locks and rerolls respect reduced motion',()=>{
 
 test('group results open a knockout without changing members and retain winners when returning to groups',()=>{
   const h=harness();
-  h.run(fs.readFileSync(path.join(root,'assets/matches-core.js'),'utf8'));
-  h.run(fs.readFileSync(path.join(root,'assets/matches.js'),'utf8'));
   h.switchTo('groups');h.input('A\nB\nC\nD\nE');h.nodes.count.value='4';h.submit();
   const groups=h.nodes.output.children[0].children.map(group=>group.children[1].children.map(item=>item.textContent).join(', '));
   const originalOutput=h.nodes.output.children[0];
@@ -268,7 +274,7 @@ test('group results open a knockout without changing members and retain winners 
   h.nodes['match-back'].click();h.nodes['edit-draw'].click();assert(h.nodes['tournament-start'].hidden);assert(h.nodes['match-presentation'].hidden);
 });
 test('knockout entry is limited to 4–32 groups and equal teams need no warning',()=>{
-  const h=harness();h.run(fs.readFileSync(path.join(root,'assets/matches-core.js'),'utf8'));h.run(fs.readFileSync(path.join(root,'assets/matches.js'),'utf8'));
+  const h=harness();
   h.input(Array.from({length:33},(_,i)=>String(i)).join('\n'));h.submit();assert(h.nodes['tournament-start'].hidden);
   h.switchTo('groups');h.nodes.count.value='1';h.submit();assert(h.nodes['tournament-start'].hidden);
   h.nodes['edit-draw'].click();h.nodes.count.value='33';h.submit();assert(h.nodes['tournament-start'].hidden);

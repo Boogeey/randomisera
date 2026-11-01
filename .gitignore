@@ -8,3 +8,7 @@
 
 # Build dependencies
 /node_modules/
+
+# Browser test diagnostics
+/test-results/
+/playwright-report/

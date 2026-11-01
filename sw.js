@@ -1,7 +1,7 @@
 'use strict';
 // Deployment replaces the development cache name with a content hash.
 const CACHE = 'randomisera-offline-development';
-const FILES = ["./","slumpa-nummer/","dela-in-i-grupper/","slumpa-lista/","singla-slant/","lagring-och-integritet/","app/","assets/matches-core.js","assets/matches.js","assets/style.css","assets/app.js","assets/pwa.js","assets/saved-lists.js","manifest.webmanifest","assets/icons/icon-192.png","assets/icons/icon-512.png","assets/icons/icon-maskable-512.png","assets/icons/apple-touch-icon.png","assets/icons/favicon.ico"];
+const FILES = ["./","slumpa-nummer/","dela-in-i-grupper/","slumpa-lista/","singla-slant/","lagring-och-integritet/","app/","assets/style.css","assets/app.js","assets/pwa.js","manifest.webmanifest","assets/icons/icon-192.png","assets/icons/icon-512.png","assets/icons/icon-maskable-512.png","assets/icons/apple-touch-icon.png","assets/icons/favicon.ico"];
 const urls = FILES.map(file => new URL(file, self.registration.scope).href);
 async function ready() {
   if (!(await caches.keys()).includes(CACHE)) return false;
