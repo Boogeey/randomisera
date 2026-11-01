@@ -94,12 +94,12 @@ async function copyText(document, navigator, text, button) {
 function animateResult({output, mode, decisionMode, diceButtons, lockedDice, reducedMotion}) {
   if (!reducedMotion) {
     // Animate the first screenfuls; long lists stay responsive and immediately usable.
-    const order = mode === 'list';
-    const targets = order ? Array.from(output.children[0].children).slice(0, 20)
+    const stagger = mode === 'list' || mode === 'groups';
+    const targets = stagger ? Array.from(output.children[0].children).slice(0, 20)
       : mode === 'decide' && decisionMode === 'dice'
       ? diceButtons.filter((_, index) => !lockedDice.has(index)) : [output];
     const animations = targets.filter(target => typeof target.animate === 'function')
-      .map((target, index) => order
+      .map((target, index) => stagger
         ? target.animate([{opacity: 0, transform: 'translateY(8px)'}, {opacity: 1, transform: 'translateY(0)'}], {duration: 280, delay: index * Math.min(65, 650 / Math.max(1, targets.length - 1)), easing: 'ease-out', fill: 'backwards'})
         : target.animate([{opacity: 0.3}, {opacity: 1}], {duration: 240, easing: 'ease-out'}));
     return {cancel: () => animations.forEach(animation => animation.cancel())};
