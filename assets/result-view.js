@@ -143,12 +143,11 @@ function animateResult({output, mode, decisionMode, diceButtons, lockedDice, red
         ? target.animate([{opacity: 0, transform: 'translateY(8px)'}, {opacity: 1, transform: 'translateY(0)'}], {duration: 280, delay: index * Math.min(65, 650 / Math.max(1, targets.length - 1)), easing: 'ease-out', fill: 'backwards'})
         : target.className === 'die-button die-button--six'
         ? target.animate([
-          // One 2D transform avoids edge-on faces and multi-axis compositing on phones.
-          {transform: 'translateY(-6px) rotate(-100deg)'},
-          {transform: 'translateY(-12px) rotate(18deg)', offset: 0.55},
-          {transform: 'translateY(1px) rotate(-4deg)', offset: 0.82},
-          {transform: 'translateY(0) rotate(0deg)'}
-        ], {duration: 440, delay: Math.min(index * 20, 100), easing: 'ease-out', fill: 'backwards'})
+          {transform: 'perspective(500px) translateY(-8px) rotateX(130deg) rotateY(-100deg) rotateZ(-150deg)', opacity: 0.5},
+          {transform: 'perspective(500px) translateY(-14px) rotateX(-35deg) rotateY(40deg) rotateZ(35deg)', opacity: 1, offset: 0.55},
+          {transform: 'perspective(500px) translateY(2px) rotateX(8deg) rotateY(-8deg) rotateZ(-6deg)', offset: 0.82},
+          {transform: 'perspective(500px) translateY(0) rotateX(0) rotateY(0) rotateZ(0)'}
+        ], {duration: 520, delay: Math.min(index * 25, 150), easing: 'ease-out', fill: 'backwards'})
         : target.animate([{opacity: 0.3}, {opacity: 1}], {duration: 240, easing: 'ease-out'}));
     return {cancel: () => animations.forEach(animation => animation.cancel())};
   }
