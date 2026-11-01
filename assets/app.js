@@ -56,8 +56,8 @@ function setDrawView(presentation, focus = false) {
   if (focus) {
     document.activeElement?.blur();
     window.scrollTo({top: 0, behavior: 'instant'});
-    const target = presentation ? 'next-draw' : mode === 'numbers' ? 'min'
-      : mode === 'decide' ? (decisionMode === 'dice' ? 'dice-count' : 'decision-' + decisionMode) : 'entries';
+    const target = presentation ? 'next-draw' : 'main';
+    if (!presentation) $('main').setAttribute('tabindex', '-1');
     $(target).focus({preventScroll: true});
   }
 }
