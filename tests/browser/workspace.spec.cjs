@@ -172,7 +172,9 @@ test('six-sided dice show matching pips, tumble only when unlocked and respect r
   await dice.first().click();
   await page.locator('#next-draw').click();
   expect(await dice.first().evaluate(node => node.getAnimations().length)).toBe(0);
-  expect(await dice.nth(1).evaluate(node => node.getAnimations().some(animation => animation.effect.getKeyframes().some(frame => /rotateX|matrix3d/.test(frame.transform || ''))))).toBe(true);
+  const frames = await dice.nth(1).evaluate(node => node.getAnimations()[0].effect.getKeyframes());
+  expect(frames.some(frame => /rotate\(/.test(frame.transform || ''))).toBe(true);
+  expect(frames.every(frame => !/perspective|rotate[XYZ]|matrix3d/.test(frame.transform || '') && frame.opacity === undefined)).toBe(true);
   await page.emulateMedia({reducedMotion: 'reduce'});
   await page.locator('#next-draw').click();
   expect(await page.locator('#output').evaluate(node => node.getAnimations({subtree: true}).length)).toBe(0);
