@@ -1,0 +1,57 @@
+<!doctype html>
+<!-- Generated from templates/decision-tool.html. Run npm run generate; do not edit the generated pages. -->
+<html lang="sv">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kasta tärning online – d4 till d100 | Randomisera.se</title>
+<meta name="description" content="Kasta 1–100 tärningar med 4, 6, 8, 10, 12, 20 eller 100 sidor. Se summan, lås valda tärningar och kasta om resten. Gratis och utan reklam.">
+<link rel="canonical" href="https://randomisera.se/kasta-tarning/">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FCFCFA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#191F1B" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="manifest" href="../manifest.webmanifest"><link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png"><link rel="icon" href="../assets/icons/favicon.ico">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://randomisera.se/kasta-tarning/","url":"https://randomisera.se/kasta-tarning/","name":"Kasta tärning online – d4 till d100 | Randomisera.se","description":"Kasta 1–100 tärningar med 4, 6, 8, 10, 12, 20 eller 100 sidor. Se summan, lås valda tärningar och kasta om resten. Gratis och utan reklam.","inLanguage":"sv","isPartOf":{"@id":"https://randomisera.se/#website"}}]}</script>
+</head>
+<body data-mode="decide" data-decision="dice">
+<a class="skip" href="#main">Hoppa till innehållet</a>
+<main id="main" class="list-page decision-page">
+<div id="prepare-view">
+<a class="brand" href="../">randomisera.se</a>
+<nav aria-label="Verktyg" id="tools"><a href="../">Listverktyg</a><a href="../slumpa-nummer/">Nummer</a><a href="../singla-slant/" aria-current="page">Slumpval</a></nav>
+<h1 id="page-heading">Kasta tärning</h1><p class="intro" id="page-intro">Slå en eller flera tärningar till sällskapsspel, rollspel eller egna lekar.</p>
+<div class="mode-switch" role="group" aria-label="Vad vill du göra?">
+<button type="button" id="decision-coin" data-decision-mode="coin" aria-pressed="false">Singla slant</button>
+<button type="button" id="decision-yes" data-decision-mode="yes" aria-pressed="false">Ja eller nej</button>
+<button type="button" id="decision-dice" data-decision-mode="dice" aria-pressed="true">Kasta tärning</button>
+</div>
+<p class="help" id="help" aria-live="polite">Välj antal tärningar och hur många sidor de ska ha.</p>
+<form id="form" aria-labelledby="title" aria-describedby="help">
+<h2 id="title" class="sr-only">Kasta tärning</h2>
+
+<div class="decision-settings">
+<div id="decisionFields">
+<div id="dice-fields" class="dice-fields">
+<div><label for="dice-count">Antal tärningar</label><input id="dice-count" type="number" value="1" min="1" max="100" step="1" required></div>
+<div><label for="dice-sides">Typ av tärning</label><select id="dice-sides"><option value="4">4 sidor</option><option value="6" selected>6 sidor</option><option value="8">8 sidor</option><option value="10">10 sidor</option><option value="12">12 sidor</option><option value="20">20 sidor</option><option value="100">100 sidor</option></select></div>
+</div></div>
+<p id="error" class="error" role="alert" hidden></p>
+<button type="submit" class="primary" id="submit">Kasta tärningarna</button>
+<p class="step-note">Resultatet visas i nästa vy.</p>
+</div></form><section id="tool-description" class="tool-description" data-base="../" aria-labelledby="use-cases-title"><h2 id="use-cases-title">Digitala tärningar för sällskapsspel och rollspel</h2><div id="use-cases-paragraphs"><p>Välj hur många tärningar du vill kasta och vilken typ du behöver: d4, d6, d8, d10, d12, d20 eller d100. Resultatet visar varje tärning och deras sammanlagda summa.</p><p>Tryck på en tärning för att låsa värdet. Nästa kast slumpar bara de olåsta tärningarna, vilket är användbart i spel där du vill behålla delar av ett kast.</p></div><nav id="related-tools" class="tool-links" aria-label="Fler slumpverktyg"><a href="../#valj">Slumpa namn</a><a href="../dela-in-i-grupper/">Dela in grupper</a><a href="../slumpa-lista/">Blanda lista</a><a href="../slumpa-nummer/">Slumpa nummer</a><a href="../singla-slant/">Singla slant</a><a href="../ja-eller-nej/">Ja eller nej</a></nav></section></div>
+<p id="draw-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+<p id="dice-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+<section id="presentation-view" aria-labelledby="result-title" hidden>
+<div class="presentation-topbar"><button type="button" id="edit-draw">‹ Tillbaka</button><span class="presentation-brand">randomisera.se</span><button type="button" id="copy" disabled>Kopiera resultat</button></div>
+<div class="presentation-content"><p id="presentation-origin" class="note"></p>
+
+<div class="presentation-caption"><h2 id="result-title" tabindex="-1">Slumpen valde</h2><p id="draw-counter" class="draw-counter" aria-hidden="true"></p></div><div class="presentation-stage"><div id="output"></div><p id="dice-hint" class="dice-hint" hidden>Tryck på en tärning för att låsa eller låsa upp.</p><p class="note" id="status">Redo när du är.</p></div>
+<div class="presentation-actions"><button type="button" id="next-draw" class="primary">Välj nästa</button><button type="button" id="unlock-dice" hidden>Lås upp alla</button></div>
+<details id="history" class="history" hidden><summary id="history-title">Visa historik</summary><ol id="history-list" reversed></ol><div class="history-actions"><button type="button" id="copy-history">Kopiera alla</button><button type="button" id="clear-history">Rensa historik</button></div><p class="note">Historiken försvinner när sidan laddas om eller stängs.</p></details></div></section>
+
+<noscript><p>Aktivera JavaScript för att använda verktyget.</p></noscript></main>
+<footer><div class="footer-links"><a class="contact-link" href="mailto:feedback.randomisera@outlook.com">Kontakt</a><span aria-hidden="true">·</span><a class="privacy-link" href="../lagring-och-integritet/">Lagring och integritet</a><span aria-hidden="true">·</span><a class="app-link" href="../app/">App</a></div></footer>
+<script src="../assets/app.js" defer></script>
+<script src="../assets/pwa.js" defer></script>
+</body>
+</html>

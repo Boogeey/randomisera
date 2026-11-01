@@ -2,7 +2,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const root=path.resolve(__dirname,'..');
 test('footers contain only contact, privacy and App, with valid local links',()=>{
-  for(const page of ['index.html','dela-in-i-grupper/index.html','slumpa-lista/index.html','slumpa-nummer/index.html','singla-slant/index.html','lagring-och-integritet/index.html','app/index.html']){
+  for(const page of ['index.html','dela-in-i-grupper/index.html','slumpa-lista/index.html','slumpa-nummer/index.html','singla-slant/index.html','ja-eller-nej/index.html','kasta-tarning/index.html','lagring-och-integritet/index.html','app/index.html']){
     const html=fs.readFileSync(path.join(root,page),'utf8'),footer=html.match(/<footer>([\s\S]*?)<\/footer>/)[1];
     assert.deepEqual([...footer.matchAll(/<a[^>]+>([^<]+)<\/a>/g)].map(match=>match[1]),['Kontakt','Lagring och integritet','App']);
     assert(!footer.includes('<button'));assert(!footer.includes('install-toggle'));

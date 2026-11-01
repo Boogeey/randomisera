@@ -8,8 +8,9 @@ Randomisera remains a static website. Runtime code has no external dependencies,
 
 | Source | Responsibility |
 | --- | --- |
-| `templates/list-tool.html` | The shared list preparation, presentation, and knockout markup |
-| `scripts/list-pages.cjs` | Titles, descriptions, canonical URLs, base paths, and initial modes for the three list addresses |
+| `templates/list-tool.html`, `templates/decision-tool.html` | Shared list and quick-choice preparation/presentation markup |
+| `scripts/list-pages.cjs` | Tool routes, metadata, use-case text, related links, template rendering, and sitemap URLs |
+| `assets/tool-content.js` | Visible headings and introductions shared by generation and mode changes |
 | `assets/app.js` | Tool initialization, input events, navigation, focus, and orchestration |
 | `assets/workspace-state.js` | Independent workspace settings and round state; round reset preserves settings |
 | `assets/draw-core.js` | Number, list, group, and dice calculations, grouping plans, and result text |
@@ -28,13 +29,13 @@ The knockout UI uses team objects containing an ID, display name, and members. I
 
 ## Generated pages
 
-Edit the list template or route configuration, then run:
+Edit the tool templates or route configuration, then run:
 
 ```sh
 npm run generate
 ```
 
-The generated `index.html`, `dela-in-i-grupper/index.html`, and `slumpa-lista/index.html` remain committed for discoverability. They are not independently maintained sources. A unit test rejects stale generated files, and the publication build renders directly from the template. Changes must not be made only to a generated file.
+The generated `index.html`, `dela-in-i-grupper/index.html`, `slumpa-lista/index.html`, `singla-slant/index.html`, `ja-eller-nej/index.html`, and `kasta-tarning/index.html` remain committed for discoverability. They are not independently maintained sources. Unit tests reject stale generated pages and sitemap content, and the publication build renders pages directly from their templates. Changes must not be made only to a generated file.
 
 Other tool and information pages remain ordinary HTML files. They reuse the same bundled controller and CSS where appropriate.
 

@@ -1,4 +1,24 @@
 'use strict';
+const {toolLinks} = require('./tool-content.js');
+
+function updateToolContent(document, content, key) {
+  const $ = id => document.getElementById(id);
+  const description = $('tool-description');
+  if (!description || !content) return;
+  description.hidden = false;
+  $('use-cases-title').textContent = content.detailTitle;
+  $('use-cases-paragraphs').replaceChildren(...content.paragraphs.map(text => {
+    const paragraph = document.createElement('p');
+    paragraph.textContent = text;
+    return paragraph;
+  }));
+  $('related-tools').replaceChildren(...toolLinks.filter(tool => tool.key !== key).map(tool => {
+    const link = document.createElement('a');
+    link.href = (description.dataset.base || './') + tool.path + tool.fragment;
+    link.textContent = tool.label;
+    return link;
+  }));
+}
 
 function renderResult(document, lines, {mode, decisionMode, onToggleDie}) {
   const $ = id => document.getElementById(id);
@@ -87,4 +107,4 @@ function animateResult({output, mode, decisionMode, diceButtons, lockedDice, red
   return null;
 }
 
-module.exports = {renderResult, renderResultContext, copyText, animateResult};
+module.exports = {updateToolContent, renderResult, renderResultContext, copyText, animateResult};

@@ -3,29 +3,30 @@
 <html lang="sv">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Dela in i slumpmässiga grupper | Randomisera.se</title>
-<meta name="description" content="Dela in namn i slumpmässiga grupper eller lag. Välj antal grupper och få en jämn fördelning. Samma lista kan också användas för slumpval och blandning.">
+<title>Dela in i grupper och slumpa lag | Randomisera.se</title>
+<meta name="description" content="Dela in namn i slumpmässiga grupper eller lag. Välj antal grupper eller max personer per grupp och se fördelningen direkt. Gratis och utan konto.">
 <link rel="canonical" href="https://randomisera.se/dela-in-i-grupper/">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#FCFCFA" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#191F1B" media="(prefers-color-scheme: dark)">
 <link rel="stylesheet" href="../assets/style.css">
 <link rel="manifest" href="../manifest.webmanifest"><link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png"><link rel="icon" href="../assets/icons/favicon.ico">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://randomisera.se/dela-in-i-grupper/","url":"https://randomisera.se/dela-in-i-grupper/","name":"Dela in i grupper och slumpa lag | Randomisera.se","description":"Dela in namn i slumpmässiga grupper eller lag. Välj antal grupper eller max personer per grupp och se fördelningen direkt. Gratis och utan konto.","inLanguage":"sv","isPartOf":{"@id":"https://randomisera.se/#website"}}]}</script>
 </head>
 <body data-mode="groups">
 <a class="skip" href="#main">Hoppa till innehållet</a>
 <main id="main" class="list-page">
 <div id="prepare-view">
-<a class="brand" href="../index.html">randomisera.se</a>
-<nav aria-label="Verktyg" id="tools"><a href="../index.html" aria-current="page">Listverktyg</a><a href="../slumpa-nummer/index.html">Nummer</a><a href="../singla-slant/index.html">Slumpval</a></nav>
-<h1>Låt slumpen avgöra</h1>
-<p class="intro">Lägg in din lista och välj vad du vill göra.</p>
+<a class="brand" href="../">randomisera.se</a>
+<nav aria-label="Verktyg" id="tools"><a href="../" aria-current="page">Listverktyg</a><a href="../slumpa-nummer/">Nummer</a><a href="../singla-slant/">Slumpval</a></nav>
+<h1 id="page-heading">Dela in i slumpmässiga grupper</h1>
+<p class="intro" id="page-intro">Skapa jämna lag eller grupper från en lista med namn.</p>
 <div class="mode-switch" role="group" aria-label="Vad vill du göra?">
-<button type="button" data-list-mode="choose" aria-pressed="true">Välj</button>
-<button type="button" data-list-mode="groups" aria-pressed="false">Gruppera</button>
+<button type="button" data-list-mode="choose" aria-pressed="false">Välj</button>
+<button type="button" data-list-mode="groups" aria-pressed="true">Gruppera</button>
 <button type="button" data-list-mode="list" aria-pressed="false">Blanda</button>
 </div>
-<p class="help" id="help" aria-live="polite">Välj en vinnare, kvällens film eller vem som börjar.</p>
+<p class="help" id="help" aria-live="polite">Dela in deltagare i lag, arbetsgrupper eller par.</p>
 <div class="workspace">
 
 <form id="form" aria-labelledby="title" aria-describedby="help">
@@ -50,6 +51,7 @@
 
 </div>
 
+<section id="tool-description" class="tool-description" data-base="../" aria-labelledby="use-cases-title"><h2 id="use-cases-title">Slumpa grupper till klassrummet, mötet eller matchen</h2><div id="use-cases-paragraphs"><p>Lägg in deltagarnas namn och välj antal grupper eller max personer per grupp. Verktyget fördelar deltagarna så jämnt som möjligt och visar i förväg hur stora grupperna blir.</p><p>Använd grupperna för klassuppgifter, workshops eller lagspel. När du har skapat minst fyra lag kan du fortsätta till ett slutspel med samma lag och välja vinnare i matcherna.</p></div><nav id="related-tools" class="tool-links" aria-label="Fler slumpverktyg"><a href="../#valj">Slumpa namn</a><a href="../slumpa-lista/">Blanda lista</a><a href="../slumpa-nummer/">Slumpa nummer</a><a href="../singla-slant/">Singla slant</a><a href="../ja-eller-nej/">Ja eller nej</a><a href="../kasta-tarning/">Kasta tärning</a></nav></section>
 </div>
 <p id="draw-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
 <section id="presentation-view" aria-labelledby="result-title" hidden>
@@ -66,7 +68,7 @@
 <div class="match-navigation"><button type="button" id="match-prev">‹ Föregående</button><button type="button" class="primary" id="match-next">Nästa omgång ›</button></div>
 <details id="match-overview"><summary>Visa hela slutspelet</summary><div id="match-all"></div></details><p id="match-session-note" class="note">Slutspelet försvinner när sidan laddas om. Kopiera det om du vill behålla det.</p></div></section>
 <p id="match-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
-<noscript><p>Aktivera JavaScript för att använda verktyget.</p></noscript></main><footer><div class="footer-links"><a class="contact-link" href="mailto:feedback.randomisera@outlook.com">Kontakt</a><span aria-hidden="true">·</span><a class="privacy-link" href="../lagring-och-integritet/index.html">Lagring och integritet</a><span aria-hidden="true">·</span><a class="app-link" href="../app/index.html">App</a></div></footer>
+<noscript><p>Aktivera JavaScript för att använda verktyget.</p></noscript></main><footer><div class="footer-links"><a class="contact-link" href="mailto:feedback.randomisera@outlook.com">Kontakt</a><span aria-hidden="true">·</span><a class="privacy-link" href="../lagring-och-integritet/">Lagring och integritet</a><span aria-hidden="true">·</span><a class="app-link" href="../app/">App</a></div></footer>
 <script src="../assets/app.js" defer></script>
 <script src="../assets/pwa.js" defer></script>
 </body>

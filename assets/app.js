@@ -6,10 +6,12 @@ const view = require('./result-view.js');
 const {initTournament} = require('./matches.js');
 const {initSavedLists} = require('./saved-lists.js');
 const {createListStorage} = require('./storage.js');
+const {listContent, decisionContent} = require('./tool-content.js');
 
 const $ = id => document.getElementById(id);
 const listModes = ['choose', 'groups', 'list'];
 const initialMode = document.body.dataset.mode || 'choose';
+const initialDecision = document.body.dataset.decision || 'coin';
 const isListTool = listModes.includes(initialMode);
 const modes = {
   choose: {title: 'Låt slumpen avgöra', help: 'Välj en vinnare, kvällens film eller vem som börjar.', action: 'Välj slumpmässigt', label: 'Välj', count: 'Antal att välja'},
@@ -113,6 +115,12 @@ function selectMode(next) {
   state.mode = next;
   document.body.dataset.mode = state.mode;
   const config = modes[state.mode];
+  const content = listContent[state.mode];
+  view.updateToolContent(document, content, state.mode);
+  if (content && $('page-heading')) {
+    $('page-heading').textContent = content.heading;
+    $('page-intro').textContent = content.intro;
+  }
   $('title').textContent = config.title;
   if (config.help) $('help').textContent = config.help;
   if (config.action) $('submit').textContent = config.action;
@@ -143,11 +151,16 @@ function selectDecision(next) {
   state.decisionMode = next;
   document.body.dataset.decision = next;
   const dice = next === 'dice', config = decisionModes[next];
+  view.updateToolContent(document, decisionContent[next], next);
+  if ($('page-heading')) {
+    $('page-heading').textContent = decisionContent[next].heading;
+    $('page-intro').textContent = decisionContent[next].intro;
+  }
   $('dice-fields').hidden = !dice;
   $('dice-count').disabled = !dice;
   $('dice-sides').disabled = !dice;
   $('title').textContent = config.title;
-  $('help').textContent = config.help;
+  $('help').textContent = decisionContent[next].help;
   $('submit').textContent = config.action;
   for (const button of document.querySelectorAll('[data-decision-mode]')) {
     button.setAttribute('aria-pressed', String(button.dataset.decisionMode === next));
@@ -304,7 +317,7 @@ if (isListTool) {
   window.addEventListener('popstate', routeMode);
 }
 if (state.mode === 'decide') {
-  const fromHash = () => Object.keys(decisionHashes).find(key => decisionHashes[key] === window.location.hash) || 'coin';
+  const fromHash = () => Object.keys(decisionHashes).find(key => decisionHashes[key] === window.location.hash) || initialDecision;
   selectDecision(fromHash());
   for (const button of document.querySelectorAll('[data-decision-mode]')) button.addEventListener('click', () => {
     const next = button.dataset.decisionMode;

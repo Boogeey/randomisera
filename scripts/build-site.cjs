@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const {transformSync, buildSync} = require('esbuild');
-const {renderListPages} = require('./list-pages.cjs');
+const {renderPages} = require('./list-pages.cjs');
 const {minify} = require('html-minifier-terser');
 async function minifyFile(file,data) {
   const extension=path.extname(file);
@@ -18,7 +18,7 @@ async function minifyFile(file,data) {
 }
 async function build(root = path.resolve(__dirname,'..')) {
   root = fs.realpathSync(root);
-  const listPages = renderListPages(root);
+  const listPages = renderPages(root);
   const template = fs.readFileSync(path.join(root,'sw.js'),'utf8');
   const match = template.match(/const FILES = (\[[\s\S]*?\]);/);
   if (!match) throw Error('sw.js must define FILES as a JSON array.');

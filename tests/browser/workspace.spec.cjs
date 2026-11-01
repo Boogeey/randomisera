@@ -95,10 +95,65 @@ test('presentation counter changes even for identical values and reduced motion 
 test('all published pages load without runtime errors or horizontal overflow', async ({page}) => {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
-  for (const route of ['/', '/dela-in-i-grupper/', '/slumpa-lista/', '/slumpa-nummer/', '/singla-slant/', '/app/', '/lagring-och-integritet/']) {
+  for (const route of ['/', '/dela-in-i-grupper/', '/slumpa-lista/', '/slumpa-nummer/', '/singla-slant/', '/ja-eller-nej/', '/kasta-tarning/', '/app/', '/lagring-och-integritet/']) {
     await page.goto(route);
     await expect(page.locator('h1').first()).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   }
   expect(errors).toEqual([]);
+});
+
+test('dedicated quick-choice addresses open the right mode and browser Back restores it', async ({page}) => {
+  for (const [route, heading, mode] of [['/ja-eller-nej/', 'Slumpa ja eller nej', 'yes'], ['/kasta-tarning/', 'Kasta tärning', 'dice']]) {
+    await page.goto(route);
+    await expect(page.locator('#page-heading')).toHaveText(heading);
+    await expect(page.locator('#decision-' + mode)).toHaveAttribute('aria-pressed', 'true');
+    await page.locator('#submit').click();
+    await expect(page.locator('#presentation-view')).toBeVisible();
+    await page.locator('#edit-draw').click();
+    await page.locator('#decision-coin').click();
+    await expect(page.locator('#page-heading')).toHaveText('Singla slant');
+    await page.goBack();
+    await expect(page.locator('#page-heading')).toHaveText(heading);
+  }
+});
+
+test('search entry pages expose their own content and real links without JavaScript', async ({browser, baseURL}) => {
+  const context = await browser.newContext({javaScriptEnabled: false, baseURL});
+  const page = await context.newPage();
+  for (const [route, heading] of [['/', 'Slumpa namn och egna alternativ'], ['/dela-in-i-grupper/', 'Dela in i slumpmässiga grupper'], ['/slumpa-lista/', 'Blanda en lista'], ['/slumpa-nummer/', 'Slumpa nummer'], ['/ja-eller-nej/', 'Slumpa ja eller nej'], ['/kasta-tarning/', 'Kasta tärning']]) {
+    await page.goto(route);
+    await expect(page.getByRole('heading', {level: 1})).toHaveText(heading);
+    await expect(page.locator('.tool-description')).toBeVisible();
+    await expect(page.locator('.tool-links a')).toHaveCount(6);
+  }
+  await context.close();
+});
+
+test('tool explanations stay consistent across mode buttons, main navigation and direct links', async ({page}) => {
+  await page.goto('/');
+  await page.locator('[data-list-mode="groups"]').click();
+  await expect(page.locator('#tool-description')).toBeVisible();
+  await expect(page.locator('#use-cases-title')).toHaveText('Slumpa grupper till klassrummet, mötet eller matchen');
+  const groups = await page.locator('#tool-description').textContent();
+  await page.getByRole('link', {name: 'Nummer', exact: true}).click();
+  await page.getByRole('link', {name: 'Listverktyg', exact: true}).click();
+  await expect(page.locator('#tool-description')).toHaveText(groups);
+  await page.goto('/dela-in-i-grupper/');
+  await expect(page.locator('#tool-description')).toHaveText(groups);
+  await page.getByRole('link', {name: 'Slumpa namn', exact: true}).click();
+  await expect(page.locator('[data-list-mode="choose"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('#use-cases-title')).toHaveText('Välj slumpmässigt från din egen lista');
+
+  await page.getByRole('link', {name: 'Slumpval', exact: true}).click();
+  await page.locator('#decision-dice').click();
+  await expect(page.locator('#tool-description')).toBeVisible();
+  await expect(page.locator('#use-cases-title')).toHaveText('Digitala tärningar för sällskapsspel och rollspel');
+  const dice = await page.locator('#tool-description').textContent();
+  await page.goto('/kasta-tarning/');
+  await expect(page.locator('#tool-description')).toHaveText(dice);
+  await page.locator('#decision-yes').click();
+  await expect(page.locator('#use-cases-title')).toHaveText('Ett slumpmässigt ja eller nej');
+  await page.goBack();
+  await expect(page.locator('#tool-description')).toHaveText(dice);
 });

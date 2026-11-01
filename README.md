@@ -18,7 +18,7 @@ See the [architecture decision records](docs/adr/README.md) for the reasons behi
 
 `assets/app.js` coordinates tool input and the preparation/presentation flow. Local modules separate calculations, workspace state, storage, result rendering, and knockout behavior. esbuild bundles them into a single browser script. See [Architecture](docs/Architecture.md) for module responsibilities and storage compatibility.
 
-Edit `templates/list-tool.html` for the shared list UI and run `npm run generate` to refresh its three generated pages. Other pages remain directly editable HTML. Use `npm run dev` to build and preview the site locally; source JavaScript must be bundled before it runs in a browser.
+Edit `templates/list-tool.html` and `templates/decision-tool.html` for shared tool markup, and run `npm run generate` to refresh the six generated entry pages and sitemap. Other pages remain directly editable HTML. Use `npm run dev` to build and preview the site locally; source JavaScript must be bundled before it runs in a browser.
 
 Run the automated checks and create the deployment folder with Node.js 22 or newer:
 
@@ -49,7 +49,7 @@ In dice presentations, each die is a native toggle button. Clicking or pressing 
 
 Every successful presentation draw shows an independent “Slumpning N” counter and briefly fades the result in over 240ms, even when the value repeats. Reduced-motion preferences disable the fade. A single polite status region announces the counter together with the result, so repeated identical values remain distinguishable for screen readers. Returning to preparation resets the counter; clearing history does not. Animations are canceled before a new draw or editing, without delaying the random result or blocking rapid clicks.
 
-The existing `singla-slant/` address now hosts **Slumpval**, with **Singla slant**, **Ja eller nej**, and **Kasta tärning** modes. Preparation and presentation use the same flow as list tools. Dice default to one six-sided die; users can choose 1–100 dice with 4, 6, 8, 10, 12, 20, or 100 sides. Each die is sampled independently using the existing unbiased cryptographic integer generator. Results show each die and the total, including in copied text and history. Returning to preparation clears the current session while retaining die settings. Mode fragments support direct links and browser Back. No new storage is used.
+The existing `singla-slant/` address now hosts **Slumpval**, with **Singla slant**, **Ja eller nej**, and **Kasta tärning** modes. Preparation and presentation use the same flow as list tools. Dice default to one six-sided die; users can choose 1–100 dice with 4, 6, 8, 10, 12, 20, or 100 sides. Each die is sampled independently using the existing unbiased cryptographic integer generator. Results show each die and the total, including in copied text and history. Returning to preparation clears the current session while retaining die settings. Mode fragments support direct links and browser Back. No new storage is used. Dedicated `ja-eller-nej/` and `kasta-tarning/` entry pages open the corresponding mode without a fragment.
 
 ## PWA
 
@@ -76,3 +76,7 @@ Run `npm ci --ignore-scripts` once after checkout or dependency changes, then `n
 ## Knockout tournaments from groups
 
 After grouping, the Create knockout tournament action is available for 4–32 groups. The existing groups become Team 1, Team 2, and so on, with their members visible. Unequal team sizes are allowed with a short notice. Team positions are randomized, byes are handled automatically, and users select winners in the presentation. Back to teams preserves the group results, bracket, and selected winners; regrouping or returning to preparation resets the tournament. Tournament state stays in memory and can be copied as text.
+
+## Search visibility
+
+Tool pages have distinct initial HTML headings and descriptions, short use-case explanations, and crawlable related-tool links. See [Search visibility](docs/Search-visibility.md) for content ownership, automated checks, and post-deployment Search Console/Bing steps.
