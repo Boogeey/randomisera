@@ -39,6 +39,10 @@ async function build(root = path.resolve(__dirname,'..')) {
       bytes.set(file,Buffer.from(bundled.outputFiles[0].contents));
     } else bytes.set(file,await minifyFile(file,original));
   }
+  // Publish the optional analytics loader without making offline installation depend on it.
+  const analytics = fs.readFileSync(path.join(root,'assets/analytics.js'));
+  sourceBytes += analytics.length;
+  bytes.set('assets/analytics.js',await minifyFile('assets/analytics.js',analytics));
   const token='randomisera-offline-BUILD_HASH';
   const integrity = Object.fromEntries(urls.map((url,index) => [url, 'sha256-'+crypto.createHash('sha256').update(bytes.get(files[index])).digest('base64')]));
   if (!template.includes('const INTEGRITY = {};')) throw Error('Missing release integrity placeholder.');
