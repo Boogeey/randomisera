@@ -27,9 +27,9 @@ jobs:
         run: node --test tests/*.test.cjs
       - name: Build static website and cache ID
         run: node scripts/build-site.cjs
-      - name: Install browser for interaction tests
-        run: npx playwright install --with-deps chromium
-      - name: Test desktop and mobile interactions
+      - name: Install browsers for interaction and upgrade tests
+        run: npx playwright install --with-deps chromium webkit
+      - name: Test desktop, mobile, and WebKit upgrades
         run: npm run test:browser
       - name: Keep browser diagnostics on failure
         if: failure()

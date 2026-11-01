@@ -12,6 +12,7 @@ The initial six records were written retrospectively on 2026-11-01, following th
 | [0004 — Generate static releases from shared source modules and templates](0004-shared-sources-and-static-build-output.md) | Accepted |
 | [0005 — Update offline releases without interrupting active use](0005-non-interrupting-offline-updates.md) | Accepted |
 | [0006 — Use one cryptographic random source](0006-shared-cryptographic-randomness.md) | Accepted |
+| [0007 — Verify offline release files and expose waiting updates](0007-verified-offline-releases.md) | Accepted |
 
 ## Maintaining the records
 

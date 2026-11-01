@@ -1,16 +1,16 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');const code=fs.readFileSync(path.join(__dirname,'../assets/pwa.js'),'utf8');const tick=()=>new Promise(resolve=>setImmediate(resolve));
-function harness({installed=false,cache=false,stored=null,blocked=false,nativePrompt=false,userAgent=null,ui=true}={}){
-  const events={},nodes={},writes=[],store=new Map(stored?[[ 'randomisera-pwa-preferences',JSON.stringify(stored)]]:[]);let ready=cache,regExists=cache,cancelled=false,registrations=0,updates=0,fail=false;
+function harness({installed=false,cache=false,stored=null,blocked=false,nativePrompt=false,userAgent=null,ui=true,waiting=false}={}){
+  const events={},documentEvents={},nodes={},writes=[],store=new Map(stored?[[ 'randomisera-pwa-preferences',JSON.stringify(stored)]]:[]);let ready=cache,regExists=cache,cancelled=false,registrations=0,updates=0,fail=false,clock=Date.now();
   const node=id=>nodes[id]??={hidden:true,disabled:false,open:false,listeners:{},setAttribute(k,v){this[k]=v},addEventListener(k,f){this.listeners[k]=f}};
-  const worker={state:'activated',postMessage(data,ports){if(fail){ports[0].postMessage({ready:false});return;}if(data.type==='PREPARE_OFFLINE')ready=true;ports[0].postMessage({ready})}};
-  const reg={scope:'https://example.com/',active:worker,async update(){updates++},async unregister(){regExists=false}};
+  const worker={state:'activated',postMessage(data,ports){if(fail){ports[0].postMessage({ready:false});return;}if(data.type==='PREPARE_OFFLINE')ready=true;ports[0].postMessage({ready,version:'randomisera-offline-test-version'})}};
+  const reg={scope:'https://example.com/',active:worker,waiting:waiting?worker:null,async update(){updates++;if(fail)throw Error('offline')},async unregister(){regExists=false}};
   const channel=class{constructor(){this.port1={close(){},onmessage:null};this.port2={postMessage:value=>queueMicrotask(()=>this.port1.onmessage?.({data:value}))}}};
   const navigator={userAgent:userAgent || (installed?'iPhone':'Chrome'),platform:installed?'iPhone':'Linux',standalone:installed,serviceWorker:{async getRegistration(){return regExists?reg:null},async register(){registrations++;regExists=true;return reg}}};
   const caches={async keys(){return ready?['randomisera-offline-test']:[]},async delete(){ready=false},async open(){return {async match(){return ready?{}:undefined}}}};
-  const context=vm.createContext({URL,Object,MessageChannel:channel,setTimeout,clearTimeout,document:{readyState:'complete',currentScript:{src:'https://example.com/assets/pwa.js'},getElementById:ui?node:()=>null},localStorage:{getItem:k=>{if(blocked)throw Error();return store.get(k)||null},setItem(k,v){if(blocked)throw Error();writes.push(v);store.set(k,v)},removeItem(k){if(blocked)throw Error();store.delete(k)}},window:{isSecureContext:true,caches,matchMedia:()=>({matches:installed,addEventListener(){}}),addEventListener(k,f){events[k]=f}},navigator,caches});
+  const context=vm.createContext({URL,Object,Date:class extends Date{static now(){return clock}},MessageChannel:channel,setTimeout,clearTimeout,document:{addEventListener(type,fn){documentEvents[type]=fn},visibilityState:'visible',readyState:'complete',currentScript:{src:'https://example.com/assets/pwa.js'},getElementById:ui?node:()=>null},localStorage:{getItem:k=>{if(blocked)throw Error();return store.get(k)||null},setItem(k,v){if(blocked)throw Error();writes.push(v);store.set(k,v)},removeItem(k){if(blocked)throw Error();store.delete(k)}},window:{isSecureContext:true,caches,matchMedia:()=>({matches:installed,addEventListener(){}}),addEventListener(k,f){events[k]=f}},navigator,caches});
   vm.runInContext(code,context);
-  return {nodes,events,writes,store,get ready(){return ready},get registrations(){return registrations},get updates(){return updates},set fail(v){fail=v},click:async id=>{await nodes[id].listeners.click();await tick()},prompt:outcome=>events.beforeinstallprompt({preventDefault(){},async prompt(){},userChoice:Promise.resolve({outcome})})};
+  return {nodes,events,documentEvents,writes,store,advance(ms){clock+=ms},get ready(){return ready},get registrations(){return registrations},get updates(){return updates},set fail(v){fail=v},click:async id=>{await nodes[id].listeners.click();await tick()},prompt:outcome=>events.beforeinstallprompt({preventDefault(){},async prompt(){},userChoice:Promise.resolve({outcome})})};
 }
 test('ordinary visit does not store preferences or register a worker; stale installed flag is removed',async()=>{const h=harness();await tick();assert.equal(h.writes.length,0);assert.equal(h.registrations,0);assert(!h.nodes['install-toggle'].hidden);const stale=harness({stored:{installed:true}});await tick();assert(!stale.store.has('randomisera-pwa-preferences'));assert(!stale.nodes['install-toggle'].hidden)});
 test('native installation cancellation does not request offline, acceptance prepares it',async()=>{const h=harness();await tick();h.prompt('dismissed');await h.click('install-toggle');assert.equal(h.registrations,0);assert.equal(h.writes.length,0);h.prompt('accepted');await h.click('install-toggle');await tick();assert(h.ready);assert.equal(h.registrations,1)});
@@ -30,4 +30,21 @@ test('tool pages work without installation UI and still maintain offline updates
 test('App page exposes offline settings before installation and identifies an open installed app',async()=>{
   const h=harness();await tick();assert(!h.nodes['offline-settings'].hidden);assert(!h.nodes['enable-offline'].hidden);assert(h.nodes['install-status'].hidden);
   const installed=harness({installed:true});await tick();assert(!installed.nodes['install-status'].hidden);assert.match(installed.nodes['install-status'].textContent,/redan/);
+});
+
+test('waiting updates show safe closing instructions and the active offline version',async()=>{
+  const h=harness({cache:true,waiting:true});await tick();await tick();
+  assert.match(h.nodes['update-status'].textContent,/ny version.*väntar/);
+  assert.equal(h.nodes['update-instructions'].hidden,false);
+  assert.equal(h.nodes['offline-version'].textContent,'Offlineversion: test-version');
+  assert(!h.nodes['check-updates'].disabled);
+});
+
+test('returning online and visible checks at most once per minute; explicit retry is allowed',async()=>{
+  const h=harness({cache:true});await tick();assert.equal(h.updates,1);
+  h.events.online();h.documentEvents.visibilitychange();await tick();assert.equal(h.updates,1);
+  h.advance(60001);h.documentEvents.visibilitychange();await tick();assert.equal(h.updates,2);
+  h.fail=true;await h.click('check-updates');assert.equal(h.updates,3);
+  assert.match(h.nodes['update-status'].textContent,/Kunde inte söka/);
+  assert(!h.nodes['check-updates'].disabled);
 });

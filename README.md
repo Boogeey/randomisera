@@ -27,7 +27,7 @@ npm ci --ignore-scripts
 npm run generate
 npm test
 npm run build
-npx playwright install chromium
+npx playwright install chromium webkit
 npm run test:browser
 ```
 
@@ -54,6 +54,8 @@ The existing `singla-slant/` address now hosts **Slumpval**, with **Singla slant
 ## PWA
 
 The footer contains **Kontakt · Lagring och integritet · App**. The separate `app/` page offers **Lägg till på hemskärmen** on mobile or **Lägg till som app** on desktop, manual iPhone/Android/desktop instructions, and offline settings. Supported browsers open their native installation prompt; other browsers show instructions. Installed app windows hide the installation action based on their actual display mode, not a saved installation flag. Tool pages retain background worker maintenance without any installation controls. Presentations hide the footer entirely.
+
+The App page also shows the active offline version, waiting-update status, a manual check, and instructions to finish the current round and close all Randomisera windows. A small footer link appears when an update waits. Automatic checks run on load, visibility, and reconnection, limited to once per minute per page. Each published worker verifies downloaded file contents with SHA-256 request integrity, including repair and fallback, so it rejects incompatible files from a newer release. Chromium and WebKit tests cover real upgrades between two built releases.
 
 Offline preparation follows the installation request or first launch of the installed app. Cached files are served immediately as one release; a new worker prepares the next release in the background and waits until old controlled windows close. No automatic reload interrupts an active session. Offline storage and removal are available under Offlineinställningar on the App page.
 

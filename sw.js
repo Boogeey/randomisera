@@ -1,17 +1,27 @@
 'use strict';
 // Deployment replaces the development cache name with a content hash.
 const CACHE = 'randomisera-offline-development';
+// Build injects the SHA-256 integrity of every final published file.
+const INTEGRITY = {};
 const FILES = ["./","slumpa-nummer/","dela-in-i-grupper/","slumpa-lista/","singla-slant/","ja-eller-nej/","kasta-tarning/","lagring-och-integritet/","app/","assets/style.css","assets/app.js","assets/pwa.js","manifest.webmanifest","assets/icons/icon-192.png","assets/icons/icon-512.png","assets/icons/icon-maskable-512.png","assets/icons/apple-touch-icon.png","assets/icons/favicon.ico"];
 const urls = FILES.map(file => new URL(file, self.registration.scope).href);
+function releaseRequest(url) {
+  const integrity = INTEGRITY[FILES[urls.indexOf(url)]];
+  if (!integrity && CACHE !== 'randomisera-offline-development') throw Error('Missing release integrity');
+  return new Request(url, {cache:'reload', credentials:'same-origin', ...(integrity ? {integrity} : {})});
+}
 async function ready() {
   if (!(await caches.keys()).includes(CACHE)) return false;
   const cache = await caches.open(CACHE);
   return (await Promise.all(urls.map(url => cache.match(url)))).every(Boolean);
 }
 async function prepare() {
-  if (await ready()) return;
   const cache = await caches.open(CACHE);
-  await cache.addAll(urls.map(url => new Request(url, {cache:'reload'})));
+  const missing = [];
+  for (const url of urls) if (!await cache.match(url)) missing.push(releaseRequest(url));
+  // addAll commits this batch only if every response succeeds and passes SRI.
+  // Never replace a valid old entry with the latest file at the same URL.
+  if (missing.length) await cache.addAll(missing);
 }
 self.addEventListener('install', event => event.waitUntil(prepare()));
 // Never interrupt an active draw with skipWaiting(). A complete release waits
@@ -27,8 +37,8 @@ self.addEventListener('message', event => {
   event.waitUntil((async () => {
     try {
       if (event.data.type === 'PREPARE_OFFLINE') await prepare();
-      event.ports[0].postMessage({ready:await ready()});
-    } catch { event.ports[0].postMessage({ready:false}); }
+      event.ports[0].postMessage({ready:await ready(), version:CACHE});
+    } catch { event.ports[0].postMessage({ready:false, version:CACHE}); }
   })());
 });
 self.addEventListener('fetch', event => {
@@ -42,9 +52,14 @@ self.addEventListener('fetch', event => {
     const cache = await caches.open(CACHE);
     const response = await cache.match(url.href);
     if (response) return response;
-    // Storage may have been evicted. Recover online without mixing new assets
-    // into the existing release cache; preparation can rebuild it separately.
-    try { return await fetch(event.request); }
-    catch { return new Response('Offlinefilerna saknas. Anslut till internet och öppna Randomisera igen.', {status:503,headers:{'Content-Type':'text/plain; charset=utf-8'}}); }
+    // Only the exact file from this release may satisfy a missing cache entry.
+    // If the server now hosts another release, fail closed instead of mixing it.
+    try {
+      const response = await fetch(releaseRequest(url.href));
+      if (!response.ok) throw Error('Missing release file');
+      return response;
+    } catch {
+      return new Response('Offlinefilerna behöver uppdateras. Anslut till internet, stäng alla Randomisera-fönster och öppna appen igen. Sparade listor finns kvar.', {status:503,headers:{'Content-Type':'text/plain; charset=utf-8'}});
+    }
   })());
 });

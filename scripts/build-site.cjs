@@ -40,7 +40,11 @@ async function build(root = path.resolve(__dirname,'..')) {
     } else bytes.set(file,await minifyFile(file,original));
   }
   const token='randomisera-offline-BUILD_HASH';
-  const workerTemplate=(await minifyFile('sw.js',Buffer.from(template.replace(/const CACHE = '[^']+';/,"const CACHE = '"+token+"';")))).toString('utf8');
+  const integrity = Object.fromEntries(urls.map((url,index) => [url, 'sha256-'+crypto.createHash('sha256').update(bytes.get(files[index])).digest('base64')]));
+  if (!template.includes('const INTEGRITY = {};')) throw Error('Missing release integrity placeholder.');
+  const workerSource = template.replace('const INTEGRITY = {};','const INTEGRITY = '+JSON.stringify(integrity)+';')
+    .replace(/const CACHE = '[^']+';/,"const CACHE = '"+token+"';");
+  const workerTemplate=(await minifyFile('sw.js',Buffer.from(workerSource))).toString('utf8');
   if(!workerTemplate.includes(token))throw Error('Could not set cache placeholder.');
   const hash = crypto.createHash('sha256').update(workerTemplate);
   for (const file of [...bytes.keys()].sort()) hash.update('\0'+file+'\0').update(bytes.get(file));

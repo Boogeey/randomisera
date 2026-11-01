@@ -9,6 +9,8 @@
   const standalone = () => display.matches || navigator.standalone === true;
   const apple = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   let prompt = null, installedHere = false, pending = null;
+  let watchedRegistration = null, lastUpdateCheck = 0, checkingUpdate = null, updateNotice = null;
+  const watched = new WeakSet();
   let choice = null;
   try {
     const stored = JSON.parse(localStorage.getItem(key));
@@ -68,6 +70,76 @@
       try { worker.postMessage({type},[channel.port2]); } catch (error) { finish(error); }
     });
   }
+  function notice(waiting) {
+    if (!updateNotice && waiting && document.createElement && document.querySelector) {
+      const footer = document.querySelector('footer');
+      if (footer) {
+        updateNotice = document.createElement('p');
+        updateNotice.className = 'update-notice';
+        updateNotice.setAttribute('role','status');
+        const link = document.createElement('a');
+        link.href = new URL('app/',root).href;
+        link.textContent = 'En uppdatering är klar. Se hur du börjar använda den.';
+        updateNotice.append(link);
+        footer.append(updateNotice);
+      }
+    }
+    if (updateNotice) updateNotice.hidden = !waiting;
+  }
+  async function updateUI(reg, failed = false) {
+    const waiting = !!reg?.waiting;
+    notice(waiting);
+    if ($('update-instructions')) $('update-instructions').hidden = !waiting;
+    if ($('update-status')) $('update-status').textContent = waiting
+      ? 'En ny version är nedladdad och väntar. Du kan fortsätta använda appen tills du är klar.'
+      : failed ? 'Kunde inte söka efter uppdateringar. Anslut till internet och försök igen.'
+      : reg ? 'Ingen nedladdad uppdatering väntar.' : 'Ingen offlineversion är aktiverad. Sidan hämtas från webben.';
+    if ($('check-updates')) $('check-updates').disabled = !reg || !!checkingUpdate;
+    if ($('offline-version')) {
+      $('offline-version').textContent = reg?.active ? 'Offlineversion: kontrollerar…' : '';
+      if (reg?.active) {
+        try {
+          const info = await workerRequest(reg.active,'OFFLINE_STATUS');
+          if (watchedRegistration === reg) $('offline-version').textContent = info.version
+            ? 'Offlineversion: '+info.version.replace(/^randomisera-offline-/,'')
+            : 'Offlineversion: äldre version utan versionsinformation.';
+        } catch {
+          if (watchedRegistration === reg) $('offline-version').textContent = 'Offlineversionen kunde inte läsas.';
+        }
+      }
+    }
+  }
+  function watchRegistration(reg) {
+    watchedRegistration = reg;
+    if (reg && !watched.has(reg)) {
+      watched.add(reg);
+      const followInstall = () => {
+        const worker = reg.installing;
+        worker?.addEventListener('statechange',()=>{
+          if (watchedRegistration === reg) void updateUI(reg,worker.state === 'redundant');
+        });
+      };
+      reg.addEventListener?.('updatefound',followInstall);
+      followInstall();
+    }
+    void updateUI(reg);
+  }
+  function checkForUpdates(force = false) {
+    if (checkingUpdate) return checkingUpdate;
+    if (!watchedRegistration || (!force && Date.now()-lastUpdateCheck < 60000)) return Promise.resolve();
+    lastUpdateCheck = Date.now();
+    const reg = watchedRegistration;
+    if ($('check-updates')) $('check-updates').disabled = true;
+    checkingUpdate = (async()=>{
+      let failed = false;
+      try { await reg.update(); } catch { failed = true; }
+      finally {
+        checkingUpdate = null;
+        if (watchedRegistration === reg) void updateUI(reg,failed);
+      }
+    })();
+    return checkingUpdate;
+  }
   async function registration() {
     const reg = await navigator.serviceWorker.getRegistration(root.href);
     return reg?.scope === root.href ? reg : null;
@@ -106,6 +178,7 @@
       message();if(hasInstallUI)$('offline-info').textContent = 'Förbereder offlinefiler…';
       try {
         const reg = await navigator.serviceWorker.register(new URL('sw.js',root),{scope:root.href,updateViaCache:'none'});
+        watchRegistration(reg);
         await waitForActive(reg);
         if (!await isReady(reg)) {
           const result = await workerRequest(reg.active,'PREPARE_OFFLINE',30000);
@@ -145,20 +218,27 @@
       try {
         const reg=await registration();if(reg)await reg.unregister();
         for(const name of await caches.keys())if(name.startsWith('randomisera-offline-'))await caches.delete(name);
+        watchRegistration(null);
         remember(false);offlineUI(false);
         message('Offlinefilerna är borttagna. Starta om appen för att avsluta offlineläget helt. Sparade listor finns kvar.');
       } catch {message('Offlinefilerna kunde inte tas bort. Försök igen.','error');}
     })().finally(()=>{pending=null;offlineBusy(false);});
     await pending;
   });
+  $('check-updates')?.addEventListener('click',()=>{void checkForUpdates(true);});
+  window.addEventListener('online',()=>{void checkForUpdates();});
+  document.addEventListener?.('visibilitychange',()=>{
+    if (document.visibilityState === 'visible') void checkForUpdates();
+  });
   async function initialize() {
     installUI();offlineUI(false);
-    if(!supported)return;
+    if(!supported){watchRegistration(null);return;}
     if(standalone() && choice===null)remember(true);
     try {
       const reg=await registration();
+      watchRegistration(reg);
       // Update checks run independently of rendering and never reload this page.
-      if(reg){const check=()=>{void reg.update().catch(()=>{});};if(document.readyState==='complete')check();else window.addEventListener('load',check,{once:true});}
+      if(reg){const check=()=>{void checkForUpdates();};if(document.readyState==='complete')check();else window.addEventListener('load',check,{once:true});}
       const ready=await isReady(reg);offlineUI(ready);
       if(!ready && choice===true)void enableOffline();
     } catch {if(choice===true)void enableOffline();}

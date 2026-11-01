@@ -329,6 +329,13 @@ footer {
 #offline-status:empty {
   display: none;
 }
+.update-notice {
+  margin: 12px 0 0;
+  font-size: 13px;
+}
+body[data-view=presentation] .update-notice {
+  display: none;
+}
 /* Saved lists */
 .saved-lists {
   margin-top: 8px;

@@ -52,7 +52,7 @@ npm ci --ignore-scripts
 npm run generate
 npm test
 npm run build
-npx playwright install chromium
+npx playwright install chromium webkit
 npm run test:browser
 npm run dev
 ```
@@ -68,3 +68,5 @@ GitHub Actions runs both suites before deployment and retains browser failure di
 The `FILES` list in `sw.js` is the public release allowlist. The build bundles local controller dependencies, minifies assets, and hashes the final release files. Internal modules, templates, test files, and Node packages are not published. Do not increment cache versions manually or add unbundled source modules to the offline allowlist.
 
 The service worker keeps existing release-update semantics: it prepares a complete release and waits for old controlled windows to close. Refactoring storage or PWA code must preserve existing user data and this update boundary.
+
+The build embeds SHA-256 request integrity for every final offline file in the worker. Missing-file fallback and repair must pass the same checks as installation; an old worker must never silently substitute today's incompatible file. The App page exposes worker version and waiting-update status, with throttled checks on load, visibility, and reconnection. No update deliberately reloads an active result. Playwright upgrade tests use two independently built releases and a switchable local server to cover multi-window activation, offline restart, list preservation, failed/mismatched installation, and repair after eviction.

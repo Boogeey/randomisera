@@ -3,6 +3,8 @@
 - Status: Accepted
 - Recorded: 2026-11-01, retrospectively
 
+Follow-up: [0007](0007-verified-offline-releases.md) strengthens file recovery with per-file integrity and adds visible update status. The non-interruption and window-closing activation decision remains in effect.
+
 ## Context
 
 Randomisera can be added from the browser and prepared for offline use. A user may be in the middle of a draw session or tournament when a new release becomes available. Refreshing automatically would discard memory-only results, history, and tournament progress.
