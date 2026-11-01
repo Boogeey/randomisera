@@ -1129,6 +1129,27 @@ body[data-view=presentation] footer {
   line-height: 1.2;
   letter-spacing: -1px;
 }
+.die-button--six {
+  aspect-ratio: 1;
+  padding: 20px;
+  background: var(--surface);
+  box-shadow: inset 0 -3px 0 rgb(0 0 0 / 7%), 0 2px 4px rgb(0 0 0 / 6%);
+}
+.die-face {
+  display: grid;
+  grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+  width: 100%;
+  aspect-ratio: 1;
+  gap: 5px;
+}
+.die-pip {
+  align-self: center;
+  justify-self: center;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: currentColor;
+}
 .die-button[aria-pressed=true] {
   border-color: var(--accent);
   box-shadow: inset 0 0 0 1px var(--accent);

@@ -157,3 +157,28 @@ test('tool explanations stay consistent across mode buttons, main navigation and
   await page.goBack();
   await expect(page.locator('#tool-description')).toHaveText(dice);
 });
+
+test('six-sided dice show matching pips, tumble only when unlocked and respect reduced motion', async ({page}) => {
+  await page.goto('/kasta-tarning/');
+  await page.locator('#dice-count').fill('12');
+  await page.locator('#submit').click();
+  const dice = page.locator('.die-button--six');
+  await expect(dice).toHaveCount(12);
+  for (const die of await dice.all()) {
+    const value = Number(await die.locator('.sr-only').textContent());
+    await expect(die.locator('.die-pip')).toHaveCount(value);
+    await expect(die).toHaveAccessibleName(new RegExp('Tärning \\d+: ' + value));
+  }
+  await dice.first().click();
+  await page.locator('#next-draw').click();
+  expect(await dice.first().evaluate(node => node.getAnimations().length)).toBe(0);
+  expect(await dice.nth(1).evaluate(node => node.getAnimations().some(animation => animation.effect.getKeyframes().some(frame => /rotateX|matrix3d/.test(frame.transform || ''))))).toBe(true);
+  await page.emulateMedia({reducedMotion: 'reduce'});
+  await page.locator('#next-draw').click();
+  expect(await page.locator('#output').evaluate(node => node.getAnimations({subtree: true}).length)).toBe(0);
+  await page.locator('#edit-draw').click();
+  await page.locator('#dice-sides').selectOption('20');
+  await page.locator('#submit').click();
+  await expect(page.locator('.die-face')).toHaveCount(0);
+  await expect(page.locator('.die-button').first()).toHaveText(/^\d+$/);
+});

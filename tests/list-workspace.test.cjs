@@ -172,7 +172,7 @@ test('dice results respect the count and die type and include the correct sum an
   for(const sides of [4,6,8,10,12,20,100]){
     const h=harness('decide','#tarning');h.nodes['dice-count'].value='12';h.nodes['dice-sides'].value=String(sides);h.submit();
     assert(h.nodes.error.hidden);const dice=h.nodes.output.children[0].children;assert.equal(dice.length,12);
-    const values=dice.map(li=>Number(li.children[0].textContent));assert(values.every(n=>Number.isInteger(n)&&n>=1&&n<=sides));
+    const values=dice.map(li=>Number(sides === 6 ? li.children[0].children[0].textContent : li.children[0].textContent));assert(values.every(n=>Number.isInteger(n)&&n>=1&&n<=sides));
     const sum=values.reduce((a,b)=>a+b,0);assert.equal(h.nodes.status.textContent,'Summa: '+sum);assert(h.run('lastText').includes('Tärning 12: '));assert(h.run('lastText').endsWith('Summa: '+sum));
     assert.equal(h.nodes['next-draw'].textContent,'Kasta igen');h.nodes['next-draw'].click();assert.equal(h.nodes.output.children[0].children.length,12);
     h.nodes['edit-draw'].click();assert.equal(h.nodes['dice-count'].value,'12');assert.equal(h.nodes['dice-sides'].value,String(sides));assert.equal(h.run('resultHistory.length'),0);

@@ -234,7 +234,7 @@ function generateList() {
 
 function show(lines, status) {
   tournament?.setGroups(state.mode === 'groups' ? lines : []);
-  diceButtons = view.renderResult(document, lines, {mode: state.mode, decisionMode: state.decisionMode, onToggleDie: toggleDie});
+  diceButtons = view.renderResult(document, lines, {mode: state.mode, decisionMode: state.decisionMode, diceSides: Number($('dice-sides')?.value), onToggleDie: toggleDie});
   if (state.mode === 'decide' && state.decisionMode === 'dice') updateDiceButtons();
   state.lastText = core.formatResult(lines, status, state.mode, state.decisionMode);
   const label = state.mode === 'decide' ? decisionModes[state.decisionMode].label : modes[state.mode].label;

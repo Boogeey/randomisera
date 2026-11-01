@@ -20,7 +20,7 @@ function updateToolContent(document, content, key) {
   }));
 }
 
-function renderResult(document, lines, {mode, decisionMode, onToggleDie}) {
+function renderResult(document, lines, {mode, decisionMode, diceSides, onToggleDie}) {
   const $ = id => document.getElementById(id);
   const dice = mode === 'decide' && decisionMode === 'dice';
   const diceButtons = [];
@@ -44,7 +44,24 @@ function renderResult(document, lines, {mode, decisionMode, onToggleDie}) {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'die-button';
-        button.textContent = line;
+        if (Number(diceSides) === 6) {
+          button.className = 'die-button die-button--six';
+          const value = document.createElement('span');
+          value.className = 'sr-only';
+          value.textContent = line;
+          button.append(value);
+          const face = document.createElement('span');
+          face.className = 'die-face';
+          face.setAttribute('aria-hidden', 'true');
+          const positions = {1: [5], 2: [1, 9], 3: [1, 5, 9], 4: [1, 3, 7, 9], 5: [1, 3, 5, 7, 9], 6: [1, 3, 4, 6, 7, 9]};
+          for (const position of positions[line]) {
+            const pip = document.createElement('span');
+            pip.className = 'die-pip';
+            pip.style.gridArea = `${Math.ceil(position / 3)} / ${(position - 1) % 3 + 1}`;
+            face.append(pip);
+          }
+          button.append(face);
+        } else button.textContent = line;
         button.addEventListener('click', () => onToggleDie(index));
         diceButtons.push(button);
         item.append(button);
@@ -101,6 +118,13 @@ function animateResult({output, mode, decisionMode, diceButtons, lockedDice, red
     const animations = targets.filter(target => typeof target.animate === 'function')
       .map((target, index) => stagger
         ? target.animate([{opacity: 0, transform: 'translateY(8px)'}, {opacity: 1, transform: 'translateY(0)'}], {duration: 280, delay: index * Math.min(65, 650 / Math.max(1, targets.length - 1)), easing: 'ease-out', fill: 'backwards'})
+        : target.className === 'die-button die-button--six'
+        ? target.animate([
+          {transform: 'perspective(500px) translateY(-8px) rotateX(130deg) rotateY(-100deg) rotateZ(-150deg)', opacity: 0.5},
+          {transform: 'perspective(500px) translateY(-14px) rotateX(-35deg) rotateY(40deg) rotateZ(35deg)', opacity: 1, offset: 0.55},
+          {transform: 'perspective(500px) translateY(2px) rotateX(8deg) rotateY(-8deg) rotateZ(-6deg)', offset: 0.82},
+          {transform: 'perspective(500px) translateY(0) rotateX(0) rotateY(0) rotateZ(0)'}
+        ], {duration: 520, delay: Math.min(index * 25, 150), easing: 'ease-out', fill: 'backwards'})
         : target.animate([{opacity: 0.3}, {opacity: 1}], {duration: 240, easing: 'ease-out'}));
     return {cancel: () => animations.forEach(animation => animation.cancel())};
   }
