@@ -6,6 +6,8 @@ The shared list workspace has three modes: **Välj**, **Gruppera**, and **Blanda
 
 Every non-empty row is a separate entry, including identical names. “Without repetitions” prevents drawing the same row twice in a round; identical names on different rows can still appear more than once. No automatic deduplication is performed.
 
+Grouping supports either a number of groups or a maximum number of people per group. New sessions default to a maximum of four people per group; an explicit choice in the session draft takes precedence. The latter calculates the required group count and distributes participants evenly without exceeding the chosen size. A live preview explains the resulting sizes. Both count settings and the grouping method survive mode changes and same-tab navigation using the existing session draft; older drafts remain supported.
+
 Legacy URLs (`dela-in-i-grupper/` and `slumpa-lista/`) open the shared workspace in their corresponding mode. Fragment links (`#valj`, `#gruppera`, and `#blanda`) and browser Back switch modes without reloading the list.
 
 List tools use a two-step flow. Preparation contains the list and settings; a successful draw opens a dedicated presentation with Copy, Edit, and a repeat action. Returning to preparation clears drawn entries, results, and history, while preserving the list, saved-list selection, and settings. Only the presentation continues a draw session. When a batch exceeds the remaining pool, the repeat action draws the remaining entries before offering a new round, preserving the configured batch size. History is collapsed in the presentation, and remains in memory only. Desktop preparation places settings beside the list; mobile stacks them. Numbers and Slumpval use the same two-step presentation.

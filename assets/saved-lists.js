@@ -11,8 +11,9 @@
   function captureDraft(){
     if(!draftReady)return;
     try{
-      const counts={...modeCounts,[mode]:$('count').value};
-      sessionStorage.setItem(draftKey,JSON.stringify({version:1,text:$('entries').value,mode,counts,unique:$('unique').checked,active}));
+      rememberCount();
+      const counts={...modeCounts};
+      sessionStorage.setItem(draftKey,JSON.stringify({version:1,text:$('entries').value,mode,counts,grouping:{method:groupingMethod,size:groupSize},unique:$('unique').checked,active}));
     }catch{/* Restricted or full storage must not interrupt the list tools. */}
   }
   function restoreDraft(){
@@ -23,7 +24,10 @@
         const value=Number(draft.counts?.[name]);
         if(Number.isInteger(value)&&value>=1&&value<=1000)modeCounts[name]=value;
       }
-      $('count').value=modeCounts[mode]||1;
+      if (['groups','size'].includes(draft.grouping?.method)) groupingMethod=draft.grouping.method;
+      const size=Number(draft.grouping?.size);
+      if(Number.isInteger(size)&&size>=1&&size<=1000)groupSize=size;
+      $('count').value=mode==='groups'&&groupingMethod==='size'?groupSize:modeCounts[mode]||1;
       const requested=hashModes[window.location.hash]||(initialMode==='choose'?draft.mode:initialMode);
       selectMode(requested);
       $('entries').value=draft.text;
@@ -114,6 +118,7 @@
   restoreDraft();
   draftReady=true;
   for(const id of ['count','unique'])$(id).addEventListener('input',captureDraft);
+  $('group-method').addEventListener('change',captureDraft);
   document.querySelectorAll('[data-list-mode]').forEach(button=>button.addEventListener('click',captureDraft));
   window.addEventListener('pagehide',captureDraft);
   window.addEventListener('pageshow',event=>{if(event.persisted){setDrawView(false);activeState();}});

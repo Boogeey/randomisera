@@ -36,7 +36,7 @@
 <section class="list-panel" id="list-save" aria-labelledby="list-save-title" hidden><h3 id="list-save-title">Spara innehållet som en lista</h3><label for="list-name">Listans namn</label><input type="text" id="list-name" maxlength="80" placeholder="Till exempel Familjen" autocomplete="off"><div class="list-toolbar"><button type="button" id="save-list">Spara</button><button type="button" id="cancel-save">Avbryt</button></div><p class="note">Sparas bara i den här webbläsaren på din enhet. Om namnet redan finns frågar vi innan listan ersätts.</p></section>
 <p id="saved-list-status" role="status"></p></div></div>
 <div class="draw-settings">
-<div id="countFields"><label for="count" id="countLabel">Antal att välja</label><input id="count" aria-describedby="group-preview" type="number" min="1" max="1000" value="1" required></div>
+<div id="countFields"><div id="group-method-field" hidden><label for="group-method">Dela in efter</label><div class="group-select"><select id="group-method"><option value="groups">Antal grupper</option><option value="size" selected>Max personer per grupp</option></select></div></div><label for="count" id="countLabel">Antal att välja</label><input id="count" aria-describedby="group-preview" type="number" min="1" max="1000" value="1" required></div>
 <p id="group-preview" role="status" aria-live="polite" aria-atomic="true" hidden></p>
 <label class="check" id="uniqueLabel"><input id="unique" type="checkbox" checked>Utan upprepningar mellan dragningar</label>
 
@@ -55,13 +55,13 @@
 <div class="presentation-topbar"><button type="button" id="edit-draw">‹ Tillbaka</button><span class="presentation-brand">randomisera.se</span><button type="button" id="copy" disabled>Kopiera resultat</button></div>
 <div class="presentation-content"><p id="presentation-origin" class="note"></p>
 
-<div class="presentation-stage"><p id="draw-counter" class="draw-counter" aria-hidden="true"></p><h2 id="result-title" tabindex="-1">Slumpen valde</h2><div id="output"></div><p class="note" id="status">Redo när du är.</p></div>
+<div class="presentation-caption"><h2 id="result-title" tabindex="-1">Slumpen valde</h2><p id="draw-counter" class="draw-counter" aria-hidden="true"></p></div><div class="presentation-stage"><div id="output"></div><p class="note" id="status">Redo när du är.</p></div>
 <div class="presentation-actions"><button type="button" id="next-draw" class="primary">Välj nästa</button><p id="tournament-warning" class="note" hidden>Lagen har olika många deltagare. Du kan ändå skapa ett slutspel.</p><button type="button" id="tournament-start" hidden>Skapa slutspel med lagen</button></div>
 <details id="history" class="history" hidden><summary id="history-title">Visa historik</summary><ol id="history-list" reversed></ol><div class="history-actions"><button type="button" id="copy-history">Kopiera alla</button><button type="button" id="clear-history">Rensa historik</button></div><p class="note">Historiken försvinner när sidan laddas om eller stängs.</p><button type="button" id="reset" class="secondary">Börja ny omgång</button></details></div></section>
 
 <section id="match-presentation" aria-labelledby="match-title" hidden>
 <div class="presentation-topbar"><button type="button" id="match-back">‹ Tillbaka till lagen</button><span class="presentation-brand">randomisera.se</span><button type="button" id="match-copy">Kopiera slutspel</button></div>
-<div class="presentation-content"><p id="match-origin" class="note"></p><div class="match-stage"><p id="match-counter" class="draw-counter"></p><h2 id="match-title" tabindex="-1">Slutspel</h2><div id="match-output" class="knockout-round"></div></div>
+<div class="presentation-content"><p id="match-origin" class="note"></p><div class="presentation-caption"><h2 id="match-title" tabindex="-1">Slutspel</h2><p id="match-counter" class="draw-counter"></p></div><div class="match-stage"><div id="match-output" class="knockout-round"></div></div>
 <div class="match-navigation"><button type="button" id="match-prev">‹ Föregående</button><button type="button" class="primary" id="match-next">Nästa omgång ›</button></div>
 <details id="match-overview"><summary>Visa hela slutspelet</summary><div id="match-all"></div></details><p id="match-session-note" class="note">Slutspelet försvinner när sidan laddas om. Kopiera det om du vill behålla det.</p></div></section>
 <p id="match-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>

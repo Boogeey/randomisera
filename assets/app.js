@@ -5,6 +5,7 @@ const listModes = ['choose', 'groups', 'list'];
 const initialMode = document.body.dataset.mode || 'choose';
 const isListTool = listModes.includes(initialMode);
 const modeCounts = {choose: 1, groups: 2, numbers: 1};
+let groupingMethod = 'size', groupSize = 4;
 const modes = {
   choose: {title: 'Låt slumpen avgöra', help: 'Välj en vinnare, kvällens film eller vem som börjar.', action: 'Välj slumpmässigt', label: 'Välj', count: 'Antal att välja'},
   groups: {title: 'Dela in i grupper', help: 'Dela in deltagare i lag, arbetsgrupper eller par.', action: 'Skapa grupper', label: 'Gruppera', count: 'Antal grupper'},
@@ -73,10 +74,15 @@ function updateGroupPreview() {
   const preview = $('group-preview');
   if (!preview) return;
   const total = mode === 'groups' ? entries().length : 0;
-  const count = Number($('count').value);
-  preview.hidden = !total || !Number.isInteger(count) || count < 1 || count > 1000;
+  const value = Number($('count').value);
+  const count = groupingMethod === 'size' ? Math.ceil(total / value) : value;
+  preview.hidden = !total || !Number.isInteger(value) || value < 1 || value > 1000;
   preview.textContent = '';
   if (preview.hidden) return;
+  if (count > 1000) {
+    preview.textContent = 'Det blir fler än 1 000 grupper. Öka antalet personer per grupp.';
+    return;
+  }
   if (count > total) {
     preview.textContent = `Lägg till ${count - total} namn för att få ${count} grupper.`;
     return;
@@ -88,9 +94,24 @@ function updateGroupPreview() {
     : `${groupText(count)} med ${size} deltagare i varje.`;
 }
 
+function rememberCount() {
+  if (!$('count')) return;
+  if (mode === 'groups' && groupingMethod === 'size') groupSize = $('count').value;
+  else if (modeCounts[mode] !== undefined) modeCounts[mode] = $('count').value;
+}
+
+function selectGroupingMethod(next) {
+  if (!['groups', 'size'].includes(next)) return;
+  rememberCount();
+  groupingMethod = next;
+  $('count').value = groupingMethod === 'size' ? groupSize : modeCounts.groups;
+  $('countLabel').textContent = groupingMethod === 'size' ? 'Personer per grupp' : 'Antal grupper';
+  clearResult();
+}
+
 function selectMode(next) {
   if (!modes[next] || (isListTool ? !listModes.includes(next) : next !== initialMode)) return;
-  if ($('count') && modeCounts[mode] !== undefined) modeCounts[mode] = $('count').value;
+  rememberCount();
   mode = next;
   document.body.dataset.mode = mode;
   const config = modes[mode];
@@ -102,6 +123,15 @@ function selectMode(next) {
     $('count').disabled = mode === 'list';
     $('count').value = modeCounts[mode] || 1;
     $('countLabel').textContent = config.count || 'Antal att välja';
+    if (mode === 'groups' && groupingMethod === 'size') {
+      $('count').value = groupSize;
+      $('countLabel').textContent = 'Personer per grupp';
+    }
+  }
+  if ($('group-method-field')) {
+    $('group-method-field').hidden = mode !== 'groups';
+    $('group-method').disabled = mode !== 'groups';
+    $('group-method').value = groupingMethod;
   }
   if ($('uniqueLabel')) $('uniqueLabel').hidden = mode === 'groups' || mode === 'list';
   for (const button of document.querySelectorAll('[data-list-mode]')) {
@@ -231,6 +261,8 @@ function generateList() {
   if (list.length > 10000) throw new InputMessage('Använd högst 10 000 rader åt gången.');
   if (mode === 'list') return {lines: shuffle(list), status: 'Slumpat och klart.'};
   if (mode === 'groups') {
+    if (groupingMethod === 'size') count = Math.ceil(list.length / count);
+    if (count > 1000) throw new InputMessage('Det blir fler än 1 000 grupper. Öka antalet personer per grupp.');
     if (count > list.length) throw new InputMessage('Antalet grupper får inte vara större än antalet personer.');
     const groups = Array.from({length: count}, () => []);
     shuffle(list).forEach((value, i) => groups[i % count].push(value));
@@ -395,6 +427,7 @@ $('form').addEventListener('submit', submitDraw);
 for (const id of ['entries', 'unique']) $(id)?.addEventListener('input', clearResult);
 $('count')?.addEventListener('input', updateNextDraw);
 $('count')?.addEventListener('input', updateGroupPreview);
+$('group-method')?.addEventListener('change', () => selectGroupingMethod($('group-method').value));
 $('copy').addEventListener('click', () => copyText(lastText, $('copy')));
 $('edit-draw').addEventListener('click', () => setDrawView(false, true));
 $('next-draw').addEventListener('click', () => $('form').requestSubmit());

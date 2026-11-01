@@ -7,7 +7,7 @@ const vm=require('node:vm');
 const root=path.resolve(__dirname,'..');
 const code=fs.readFileSync(path.join(root,'assets/app.js'),'utf8');
 
-function harness(initial='choose',hash='',draftStore=null,savedStore=new Map(),blocked=false,reducedMotion=false){
+function harness(initial='choose',hash='',draftStore=null,savedStore=new Map(),blocked=false,reducedMotion=false,groupMethod='groups'){
   const nodes={},windowEvents={};
   function element(tag='div'){
     return {tag,children:[],animations:[],dataset:{},value:'',maxLength:100000,hidden:false,disabled:false,checked:true,textContent:'',listeners:{},
@@ -29,6 +29,8 @@ function harness(initial='choose',hash='',draftStore=null,savedStore=new Map(),b
   const queryAll=selector=>selector==='[data-decision-mode]'?decisionButtons:selector==='[data-list-mode]'?buttons:[];
   const context=vm.createContext({document:{body,getElementById:id=>nodes[id]||null,createElement:element,querySelectorAll:queryAll},window,sessionStorage:storage(draftStore||new Map()),localStorage:storage(savedStore),crypto:require('node:crypto').webcrypto,Event:class{constructor(type){this.type=type;}}});
   vm.runInContext(code,context);
+  // Existing group-count scenarios explicitly select that method.
+  if(nodes['group-method']&&groupMethod){nodes['group-method'].value=groupMethod;if(vm.runInContext('mode',context)==='groups')nodes['group-method'].dispatchEvent({type:'change'});else vm.runInContext('groupingMethod='+JSON.stringify(groupMethod),context);}
   if(draftStore)vm.runInContext(fs.readFileSync(path.join(root,'assets/saved-lists.js'),'utf8'),context);
   const input=text=>{nodes.entries.value=text;nodes.entries.dispatchEvent({type:'input'});};
   const switchTo=mode=>buttons.find(b=>b.dataset.listMode===mode).click();
@@ -298,4 +300,25 @@ test('shuffled order reveals numbered rows in sequence, caps animation duration 
  const fresh=h.nodes.output.children[0].children;h.nodes['edit-draw'].click();assert(fresh.slice(0,20).every(row=>row.animations[0].canceled));
  const reduced=harness('choose','',null,new Map(),false,true);reduced.switchTo('list');reduced.input('A\nB\nC');reduced.submit();
  assert(reduced.nodes.output.children[0].children.every(row=>row.animations.length===0));
+});
+
+test('maximum group size creates balanced groups within the limit and retains both settings',()=>{
+ const h=harness();h.switchTo('groups');h.input(Array.from({length:14},(_,i)=>String(i)).join('\n'));h.nodes.count.value='3';
+ h.nodes['group-method'].value='size';h.nodes['group-method'].dispatchEvent({type:'change'});assert.equal(Number(h.nodes.count.value),4);
+ h.submit();const groups=h.nodes.output.children[0].children.map(g=>g.children[1].children.length);assert.deepEqual(groups,[4,4,3,3]);
+ h.nodes['edit-draw'].click();h.nodes.count.value='5';h.nodes.count.dispatchEvent({type:'input'});h.switchTo('choose');h.switchTo('groups');assert.equal(Number(h.nodes.count.value),5);
+ h.nodes['group-method'].value='groups';h.nodes['group-method'].dispatchEvent({type:'change'});assert.equal(Number(h.nodes.count.value),3);
+ h.nodes['group-method'].value='size';h.nodes['group-method'].dispatchEvent({type:'change'});assert.equal(Number(h.nodes.count.value),5);
+ h.nodes.count.value='100';h.submit();assert.equal(h.nodes.output.children[0].children.length,1);
+});
+test('group size method survives same-tab navigation without changing saved lists',()=>{
+ const draft=new Map(),h=harness('choose','',draft);h.switchTo('groups');h.input('A\nB\nC\nD\nE');h.nodes['group-method'].value='size';h.nodes['group-method'].dispatchEvent({type:'change'});h.nodes.count.value='2';h.nodes.count.dispatchEvent({type:'input'});h.windowEvents.pagehide();
+ const restored=harness('choose','',draft);assert.equal(restored.run('groupingMethod'),'size');assert.equal(Number(restored.nodes.count.value),2);assert.equal(restored.nodes['countLabel'].textContent,'Personer per grupp');restored.submit();assert.equal(restored.nodes.output.children[0].children.length,3);
+});
+
+test('new sessions default to max four per group and explicit session choices take precedence',()=>{
+ const h=harness('groups','',null,new Map(),false,false,null);assert.equal(h.run('groupingMethod'),'size');assert.equal(Number(h.nodes.count.value),4);assert.equal(h.nodes['group-method'].value,'size');
+ h.input('A\nB\nC\nD\nE');h.submit();assert.equal(h.nodes.output.children[0].children.length,2);
+ const draft=new Map(),saved=harness('choose','',draft);saved.switchTo('groups');saved.nodes.count.value='3';saved.nodes.count.dispatchEvent({type:'input'});saved.windowEvents.pagehide();
+ const restored=harness('choose','',draft,new Map(),false,false,null);assert.equal(restored.run('groupingMethod'),'groups');assert.equal(Number(restored.nodes.count.value),3);
 });
