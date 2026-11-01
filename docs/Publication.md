@@ -22,12 +22,12 @@ The source worker uses `randomisera-offline-development`. The generated worker h
 ## Installation flow
 
 - Ordinary first visits do not register a service worker or create offline preferences.
-- The footer offers **Lägg till på hemskärmen** on mobile or **Lägg till som app** on desktop in browser windows.
+- The **App** page, linked from the footer, offers **Lägg till på hemskärmen** on mobile or **Lägg till som app** on desktop in browser windows.
 - If the native installation prompt is available, the button opens it. Cancellation does not request offline preparation. Acceptance or the browser's `appinstalled` event starts preparation.
 - Where no native prompt is exposed, the button displays platform instructions and requests offline preparation. Files can therefore be saved even if the user does not complete the manual installation.
 - Opening an installed app prepares offline files unless the user previously disabled offline access.
 - Installed windows hide the promotion using their real display mode. No persistent `installed` flag is used. A separate browser window may still offer installation; reliable cross-platform detection of installation elsewhere is unavailable.
-- Preparation is silent on success. Readiness is shown only inside the expandable **Offlinelagring** section. Failures open that section with a retry action.
+- Preparation is silent on success. Readiness is shown only inside the expandable **Offlineinställningar** on the App page section. Failures open that section with a retry action.
 
 ## Cached releases and updates
 
@@ -44,7 +44,7 @@ There is no update notification yet. Updates are not pushed to closed apps on a 
 
 ## Offline controls and local storage
 
-`randomisera-pwa-preferences` contains only `{offlineRequested: true}` or `{offlineRequested: false}`. Old `installed` properties are removed when read. An explicitly disabled offline choice is respected on later app launches. A user can enable offline again from **Offlinelagring**.
+`randomisera-pwa-preferences` contains only `{offlineRequested: true}` or `{offlineRequested: false}`. Old `installed` properties are removed when read. An explicitly disabled offline choice is respected on later app launches. A user can enable offline again from **Offlineinställningar** on the App page.
 
 Removing offline files unregisters this app's worker and removes only its cache prefix. It preserves saved lists and records the disabled choice. Users should restart the app to release any already running worker. Controls are disabled during preparation or removal to avoid conflicting operations. Storage failures are handled without preventing the randomization tools from working.
 
@@ -56,7 +56,7 @@ Named lists use the separate `randomisera-saved-lists-v1` key with `{version:1, 
 - [ ] Test normal and cancelled installation in Android Chrome.
 - [ ] Test Safari's Add to Home Screen flow and launch the installed iPhone app online.
 - [ ] Verify that installation instructions are hidden inside the installed app.
-- [ ] Expand **Offlinelagring** and check readiness.
+- [ ] Expand **Offlineinställningar** on the App page and check readiness.
 - [ ] Close and reopen in airplane mode; test every tool and page link.
 - [ ] Save a named list, deploy a changed release, open online to download the update, close all old app windows/tabs, and reopen. Confirm the changed release is available offline and the saved list remains.
 - [ ] Remove offline files, restart, and check that they do not reappear automatically. Enable offline again and retry airplane mode.

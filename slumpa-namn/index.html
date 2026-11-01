@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Slumpa namn och välj från en lista | Randomisera.se</title>
+<meta name="description" content="Slumpa ett eller flera namn från en lista, utan upprepningar mellan dragningar. Spara listan och använd den även för grupper och slumpmässig ordning.">
+<link rel="canonical" href="https://randomisera.se/slumpa-namn/">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FCFCFA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#191F1B" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="manifest" href="../manifest.webmanifest"><link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png"><link rel="icon" href="../assets/icons/favicon.ico">
+</head>
+<body data-mode="choose">
+<a class="skip" href="#main">Hoppa till innehållet</a>
+<main id="main" class="list-page">
+<div id="prepare-view">
+<a class="brand" href="../index.html">randomisera.se</a>
+<nav aria-label="Verktyg" id="tools"><a href="../index.html" aria-current="page">Listverktyg</a><a href="../slumpa-nummer/index.html">Nummer</a><a href="../singla-slant/index.html">Slumpval</a></nav>
+<h1>Låt slumpen avgöra</h1>
+<p class="intro">Lägg in din lista och välj vad du vill göra.</p>
+<div class="mode-switch" role="group" aria-label="Vad vill du göra?">
+<button type="button" data-list-mode="choose" aria-pressed="true">Välj</button>
+<button type="button" data-list-mode="groups" aria-pressed="false">Gruppera</button>
+<button type="button" data-list-mode="list" aria-pressed="false">Blanda</button>
+</div>
+<p class="help" id="help" aria-live="polite">Välj en vinnare, kvällens film eller vem som börjar.</p>
+<div class="workspace">
+
+<form id="form" aria-labelledby="title" aria-describedby="help">
+<h2 id="title" class="sr-only">Låt slumpen avgöra</h2>
+<div id="listFields"><div class="list-label-row"><label for="entries" id="listLabel">Din lista</label><span class="note">Ett alternativ per rad</span></div><textarea id="entries" placeholder="Alternativ 1&#10;Alternativ 2&#10;Alternativ 3" maxlength="100000"></textarea><div class="saved-lists" id="saved-lists">
+<p class="entry-count" id="entry-count" aria-live="polite">0 alternativ</p><div class="list-toolbar list-tools"><button type="button" id="open-lists" aria-expanded="false" aria-controls="list-picker">Hämta lista</button><button type="button" id="open-save" aria-expanded="false" aria-controls="list-save">Spara lista</button><button type="button" id="clear-entries" aria-controls="entries" hidden>Rensa</button></div>
+<div id="active-list" hidden><p id="active-list-name" class="note"></p><div class="list-toolbar"><button type="button" id="update-list" disabled>Spara ändringar</button><button type="button" id="save-as-new" aria-expanded="false" aria-controls="list-save">Spara som ny lista</button></div></div>
+<section class="list-panel" id="list-picker" aria-labelledby="list-picker-title" hidden><div class="list-panel-head"><h3 id="list-picker-title">Dina sparade listor</h3><button type="button" id="close-lists">Stäng</button></div><ul id="saved-list-items"></ul></section>
+<section class="list-panel" id="list-save" aria-labelledby="list-save-title" hidden><h3 id="list-save-title">Spara innehållet som en lista</h3><label for="list-name">Listans namn</label><input type="text" id="list-name" maxlength="80" placeholder="Till exempel Familjen" autocomplete="off"><div class="list-toolbar"><button type="button" id="save-list">Spara</button><button type="button" id="cancel-save">Avbryt</button></div><p class="note">Sparas bara i den här webbläsaren på din enhet. Om namnet redan finns frågar vi innan listan ersätts.</p></section>
+<p id="saved-list-status" role="status"></p></div></div>
+<div class="draw-settings">
+<div id="countFields"><label for="count" id="countLabel">Antal att välja</label><input id="count" type="number" min="1" max="1000" value="1" required></div>
+<label class="check" id="uniqueLabel"><input id="unique" type="checkbox" checked>Utan upprepningar mellan dragningar</label>
+
+<p id="error" class="error" role="alert" hidden></p>
+<button type="submit" class="primary" id="submit">Slumpa</button>
+
+<p class="step-note">Resultatet visas i nästa vy.</p>
+</div>
+</form>
+
+</div>
+
+</div>
+<p id="draw-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+<section id="presentation-view" aria-labelledby="result-title" hidden>
+<div class="presentation-topbar"><button type="button" id="edit-draw">‹ Tillbaka</button><span class="presentation-brand">randomisera.se</span><button type="button" id="copy" disabled>Kopiera resultat</button></div>
+<div class="presentation-content"><p id="presentation-origin" class="note"></p>
+
+<div class="presentation-stage"><p id="draw-counter" class="draw-counter" aria-hidden="true"></p><h2 id="result-title" tabindex="-1">Slumpen valde</h2><div id="output"></div><p class="note" id="status">Redo när du är.</p></div>
+<div class="presentation-actions"><button type="button" id="next-draw" class="primary">Välj nästa</button></div>
+<details id="history" class="history" hidden><summary id="history-title">Visa historik</summary><ol id="history-list" reversed></ol><div class="history-actions"><button type="button" id="copy-history">Kopiera alla</button><button type="button" id="clear-history">Rensa historik</button></div><p class="note">Historiken försvinner när sidan laddas om eller stängs.</p><button type="button" id="reset" class="secondary">Börja ny omgång</button></details></div></section>
+<noscript><p>Aktivera JavaScript för att använda verktyget.</p></noscript></main><footer><div class="footer-links"><a class="contact-link" href="mailto:feedback.randomisera@outlook.com">Kontakt</a><span aria-hidden="true">·</span><a class="privacy-link" href="../lagring-och-integritet/index.html">Lagring och integritet</a><span aria-hidden="true">·</span><a class="app-link" href="../app/index.html">App</a></div></footer>
+<script src="../assets/app.js" defer></script>
+<script src="../assets/pwa.js" defer></script>
+<script src="../assets/saved-lists.js" defer></script>
+</body>
+</html>

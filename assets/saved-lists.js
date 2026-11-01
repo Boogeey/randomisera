@@ -6,7 +6,36 @@
   const inputEntries=()=>$('entries').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
   const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
   const message=(text,kind='guide')=>{const element=$('saved-list-status');element.className=text?'message message--'+kind:'';element.textContent=text;};
-  let active=null,saveReturn='open-save';
+  let active=null,saveReturn='open-save',draftReady=false;
+  const draftKey='randomisera-list-draft-v1';
+  function captureDraft(){
+    if(!draftReady)return;
+    try{
+      const counts={...modeCounts,[mode]:$('count').value};
+      sessionStorage.setItem(draftKey,JSON.stringify({version:1,text:$('entries').value,mode,counts,unique:$('unique').checked,active}));
+    }catch{/* Restricted or full storage must not interrupt the list tools. */}
+  }
+  function restoreDraft(){
+    try{
+      const draft=JSON.parse(sessionStorage.getItem(draftKey));
+      if(!draft||draft.version!==1||typeof draft.text!=='string'||draft.text.length>$('entries').maxLength||!['choose','groups','list'].includes(draft.mode)||typeof draft.unique!=='boolean')return;
+      for(const name of ['choose','groups']){
+        const value=Number(draft.counts?.[name]);
+        if(Number.isInteger(value)&&value>=1&&value<=1000)modeCounts[name]=value;
+      }
+      $('count').value=modeCounts[mode]||1;
+      const requested=hashModes[window.location.hash]||(initialMode==='choose'?draft.mode:initialMode);
+      selectMode(requested);
+      $('entries').value=draft.text;
+      $('unique').checked=draft.unique;
+      const candidate=draft.active;
+      if(candidate&&typeof candidate.name==='string'&&Array.isArray(candidate.entries)&&candidate.entries.every(entry=>typeof entry==='string')){
+        try{if(read().some(list=>normalize(list.name)===normalize(candidate.name)))active={name:candidate.name,entries:[...candidate.entries]};}catch{active=null;}
+      }
+      $('entries').dispatchEvent(new Event('input',{bubbles:true}));
+      activeState();
+    }catch{/* A corrupt or inaccessible draft leaves the normal empty editor usable. */}
+  }
   function read(){
     const raw=localStorage.getItem(key);if(raw===null)return [];
     const data=JSON.parse(raw);
@@ -17,11 +46,13 @@
   function write(lists){localStorage.setItem(key,JSON.stringify({version:1,lists}));}
   const fail=(saving=false)=>message(saving?'Listan kunde inte sparas. Kontrollera att webbläsaren tillåter lokal lagring och att det finns ledigt utrymme. Försök sedan igen. Texten du skrivit finns kvar.':'Listorna kunde inte läsas eller uppdateras. Kontrollera att webbläsaren tillåter lokal lagring och försök igen. Texten du skrivit finns kvar.','error');
   function activeState(){
+    const entries=inputEntries();
     $('active-list').hidden=!active;$('open-save').hidden=!!active;
     $('active-list-name').textContent=active?'Hämtad lista: '+active.name:'';
-    $('update-list').disabled=!active||same(inputEntries(),active.entries);
-    $('open-save').disabled=inputEntries().length===0;
-    $('save-as-new').disabled=inputEntries().length===0;
+    $('update-list').disabled=!active||entries.length===0||same(entries,active.entries);
+    $('open-save').disabled=entries.length===0;
+    $('save-as-new').disabled=entries.length===0;
+    captureDraft();
   }
   function panels(which){
     $('list-picker').hidden=which!=='picker';$('list-save').hidden=which!=='save';
@@ -80,4 +111,10 @@
   $('entries').addEventListener('input',activeState);
   window.addEventListener('storage',event=>{if(event.key===key||event.key===null){try{refresh();}catch{fail();}}});
   try{refresh();}catch{activeState();fail();}
+  restoreDraft();
+  draftReady=true;
+  for(const id of ['count','unique'])$(id).addEventListener('input',captureDraft);
+  document.querySelectorAll('[data-list-mode]').forEach(button=>button.addEventListener('click',captureDraft));
+  window.addEventListener('pagehide',captureDraft);
+  window.addEventListener('pageshow',event=>{if(event.persisted){setDrawView(false);activeState();}});
 })();

@@ -2,7 +2,17 @@
 
 A small static website for random choices, numbers, groups, shuffled lists, and coin flips. No runtime framework, database, or account is required. Build dependencies are used only for publication.
 
+The shared list workspace has three modes: **Välj**, **Gruppera**, and **Blanda**. Switching modes keeps the input, saved-list selection, and individual count settings, and resets the draw session. Named lists use the existing storage format. Clearing input is undoable and never deletes a saved list. Numbers and coin flips remain separate tools.
+
+Every non-empty row is a separate entry, including identical names. “Without repetitions” prevents drawing the same row twice in a round; identical names on different rows can still appear more than once. No automatic deduplication is performed.
+
+Legacy URLs (`slumpa-namn/`, `dela-in-i-grupper/`, and `slumpa-lista/`) open the shared workspace in their corresponding mode. Fragment links (`#valj`, `#gruppera`, and `#blanda`) and browser Back switch modes without reloading the list.
+
+List tools use a two-step flow. Preparation contains the list and settings; a successful draw opens a dedicated presentation with Copy, Edit, and a repeat action. Returning to preparation clears drawn entries, results, and history, while preserving the list, saved-list selection, and settings. Only the presentation continues a draw session. When a batch exceeds the remaining pool, the repeat action draws the remaining entries before offering a new round, preserving the configured batch size. History is collapsed in the presentation, and remains in memory only. Desktop preparation places settings beside the list; mobile stacks them. Numbers and Slumpval use the same two-step presentation.
+
 ## Development
+
+`assets/app.js` shares the preparation/presentation flow across tool pages. Number generation, list generation, quick choices, result formatting, and rendering are separate functions. Each page includes only its own inputs; list submodes share one editor. Legacy addresses remain available, and local list/offline storage formats are unchanged.
 
 Edit the HTML and the shared files in `assets/`. Open `index.html` directly for basic preview, or use a localhost server for shared local storage and PWA testing. This machine's `start-local.cmd` is local-only and excluded from Git.
 
@@ -22,15 +32,29 @@ The workflow in `.github/workflows/pages.yml` tests, builds, and deploys `_site/
 
 **One-time setup:** in the repository's **Settings → Pages → Build and deployment**, choose **GitHub Actions** as the source. Keep the existing custom domain. See the [publication and PWA guide](docs/Publication.md).
 
+## Numbers
+
+The Number tool prepares an inclusive integer range, count, and a per-draw uniqueness choice, then opens the shared presentation. Repeated draws retain settings, and Edit clears the round while retaining the configured range. Uniqueness applies within a single draw, not across repeated draws. Both single and multiple results use the shared large text, counter, fade, accessible announcement, copying, and collapsed history.
+
+## Slumpval
+
+In dice presentations, each die is a native toggle button. Clicking or pressing Enter/Space locks its current value; rerolls replace only unlocked dice. Pressed state, a padlock mark, and a separate polite announcement make locks perceivable without changing the draw counter or history. The reroll action is disabled when all dice are locked, and Unlock all appears while any lock is active. Locked dice do not fade during rerolls. Returning to preparation clears all locks and values, while retaining die settings.
+
+Every successful presentation draw shows an independent “Slumpning N” counter and briefly fades the result in over 240ms, even when the value repeats. Reduced-motion preferences disable the fade. A single polite status region announces the counter together with the result, so repeated identical values remain distinguishable for screen readers. Returning to preparation resets the counter; clearing history does not. Animations are canceled before a new draw or editing, without delaying the random result or blocking rapid clicks.
+
+The existing `singla-slant/` address now hosts **Slumpval**, with **Singla slant**, **Ja eller nej**, and **Kasta tärning** modes. Preparation and presentation use the same flow as list tools. Dice default to one six-sided die; users can choose 1–100 dice with 4, 6, 8, 10, 12, 20, or 100 sides. Each die is sampled independently using the existing unbiased cryptographic integer generator. Results show each die and the total, including in copied text and history. Returning to preparation clears the current session while retaining die settings. Mode fragments support direct links and browser Back. No new storage is used.
+
 ## PWA
 
-The footer offers **Lägg till på hemskärmen** on mobile or **Lägg till som app** on desktop. Supported browsers open their native installation prompt; other browsers show instructions. Installed app windows hide the installation action based on their actual display mode, not a saved installation flag.
+The footer contains **Kontakt · Lagring och integritet · App**. The separate `app/` page offers **Lägg till på hemskärmen** on mobile or **Lägg till som app** on desktop, manual iPhone/Android/desktop instructions, and offline settings. Supported browsers open their native installation prompt; other browsers show instructions. Installed app windows hide the installation action based on their actual display mode, not a saved installation flag. Tool pages retain background worker maintenance without any installation controls. Presentations hide the footer entirely.
 
-Offline preparation follows the installation request or first launch of the installed app. Cached files are served immediately as one release; a new worker prepares the next release in the background and waits until old controlled windows close. No automatic reload interrupts an active session. Offline storage and removal are available in a small expandable footer section.
+Offline preparation follows the installation request or first launch of the installed app. Cached files are served immediately as one release; a new worker prepares the next release in the background and waits until old controlled windows close. No automatic reload interrupts an active session. Offline storage and removal are available under Offlineinställningar on the App page.
 
 Use HTTPS or localhost and test the generated `_site/` build when checking PWA updates. The source worker uses a fixed development cache name and is not a release artifact. This machine's local server also supports `node .local/serve.cjs 4173 --built` after a build. Browser storage restrictions and eviction can affect offline availability.
 
 ## Saved lists and privacy
+
+The current list draft (raw text, list mode, per-mode counts, repetition setting, and the loaded saved-list baseline) is automatically kept in `randomisera-list-draft-v1` in sessionStorage. It survives same-tab tool navigation and reloads. Named lists are never updated automatically. Clearing the editor also clears the stored draft text; undo restores it. Results and history are not stored. Storage restrictions and malformed drafts fall back to the normal editor. Browser session restoration can restore sessionStorage, so closing a tab is not a guaranteed secure deletion mechanism.
 
 Choose, Groups, and List share named lists through `randomisera-saved-lists-v1` in localStorage. Only explicit Save or Save changes actions persist input. Names are normalized to avoid duplicates, and replacement/deletion requires confirmation. Input overwrite and cross-tab conflicts are confirmed before proceeding. Result history remains in memory only.
 

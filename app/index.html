@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Randomisera som app – installation och offline</title>
+<meta name="description" content="Lägg till Randomisera på hemskärmen eller som app på datorn. Instruktioner för iPhone, Android och dator, samt inställningar för offline.">
+<link rel="canonical" href="https://randomisera.se/app/">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FCFCFA" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#191F1B" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="../assets/style.css"><link rel="manifest" href="../manifest.webmanifest"><link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png"><link rel="icon" href="../assets/icons/favicon.ico">
+</head>
+<body>
+<a class="skip" href="#main">Hoppa till innehållet</a>
+<main id="main" class="info-page app-page">
+<a class="brand" href="../index.html">randomisera.se</a>
+<nav aria-label="Verktyg" id="tools"><a href="../index.html">Listverktyg</a><a href="../slumpa-nummer/index.html">Nummer</a><a href="../singla-slant/index.html">Slumpval</a></nav>
+<h1>Randomisera som app</h1>
+<p class="intro">Öppna Randomisera direkt från hemskärmen, som en app.</p>
+<div class="install-tools">
+<button type="button" class="primary" id="install-toggle" aria-expanded="false" aria-controls="install-panel">Lägg till som app</button>
+<p id="install-status" class="note" role="status" hidden></p>
+<div id="install-panel" hidden><p id="install-help"></p><p>Instruktioner för din enhet finns också nedan. Offlinefiler förbereds när du öppnar dessa instruktioner via knappen.</p></div>
+</div>
+<section class="info-section" aria-labelledby="instructions-title">
+<h2 id="instructions-title">Så lägger du till Randomisera</h2>
+<details class="app-guide"><summary>iPhone och iPad</summary><ol><li>Tryck på <strong>Dela</strong> och välj <strong>Lägg till på hemskärmen</strong>.</li><li>Välj <strong>Öppna som webbapp</strong> om det visas och tryck på <strong>Lägg till</strong>.</li></ol><p>Öppna sedan Randomisera från ikonen på hemskärmen.</p></details>
+<details class="app-guide"><summary>Android</summary><ol><li>Öppna menyn med tre punkter och välj <strong>Installera och skapa genväg</strong> och sedan <strong>Installera</strong>. I vissa versioner heter valet <strong>Lägg till på startskärmen</strong>.</li><li>Följ anvisningarna på skärmen.</li></ol></details>
+<details class="app-guide"><summary>Dator</summary><ol><li>Använd installationsikonen vid adressfältet om den visas. I Chrome finns även <strong>Installera sidan som en app</strong> under <strong>Casta, spara och dela</strong> i menyn.</li><li>Följ webbläsarens anvisningar.</li></ol><p>Om din webbläsare saknar installation kan du fortsätta använda Randomisera direkt på webben.</p></details>
+</section>
+<section class="info-section" aria-labelledby="offline-title">
+<h2 id="offline-title">Använd utan internet</h2>
+<p>Efter att offlinefilerna har förberetts kan verktygen användas utan internet. Öppna appen med internet första gången och kontrollera statusen nedan.</p>
+<details id="offline-settings"><summary>Offlineinställningar</summary><p id="offline-info">Kontrollerar offlinefiler…</p><button type="button" id="enable-offline" hidden>Aktivera offline</button><button type="button" id="disable-offline" hidden>Ta bort offlinefiler</button><p id="offline-status" role="status"></p></details>
+<p class="note">Om du tar bort offlinefilerna finns dina sparade listor kvar. <a href="../lagring-och-integritet/index.html">Läs om lagring och integritet.</a></p>
+</section>
+<noscript><p>Aktivera JavaScript för att använda installationsknappen och hantera offlinefiler. De manuella instruktionerna ovan kan användas ändå.</p></noscript>
+</main>
+<footer><div class="footer-links"><a class="contact-link" href="mailto:feedback.randomisera@outlook.com">Kontakt</a><span aria-hidden="true">·</span><a class="privacy-link" href="../lagring-och-integritet/index.html">Lagring och integritet</a><span aria-hidden="true">·</span><a class="app-link" href="./index.html" aria-current="page">App</a></div></footer>
+<script src="../assets/pwa.js" defer></script>
+</body>
+</html>

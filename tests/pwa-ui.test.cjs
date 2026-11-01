@@ -1,6 +1,6 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');const code=fs.readFileSync(path.join(__dirname,'../assets/pwa.js'),'utf8');const tick=()=>new Promise(resolve=>setImmediate(resolve));
-function harness({installed=false,cache=false,stored=null,blocked=false,nativePrompt=false,userAgent=null}={}){
+function harness({installed=false,cache=false,stored=null,blocked=false,nativePrompt=false,userAgent=null,ui=true}={}){
   const events={},nodes={},writes=[],store=new Map(stored?[[ 'randomisera-pwa-preferences',JSON.stringify(stored)]]:[]);let ready=cache,regExists=cache,cancelled=false,registrations=0,updates=0,fail=false;
   const node=id=>nodes[id]??={hidden:true,disabled:false,open:false,listeners:{},setAttribute(k,v){this[k]=v},addEventListener(k,f){this.listeners[k]=f}};
   const worker={state:'activated',postMessage(data,ports){if(fail){ports[0].postMessage({ready:false});return;}if(data.type==='PREPARE_OFFLINE')ready=true;ports[0].postMessage({ready})}};
@@ -8,7 +8,7 @@ function harness({installed=false,cache=false,stored=null,blocked=false,nativePr
   const channel=class{constructor(){this.port1={close(){},onmessage:null};this.port2={postMessage:value=>queueMicrotask(()=>this.port1.onmessage?.({data:value}))}}};
   const navigator={userAgent:userAgent || (installed?'iPhone':'Chrome'),platform:installed?'iPhone':'Linux',standalone:installed,serviceWorker:{async getRegistration(){return regExists?reg:null},async register(){registrations++;regExists=true;return reg}}};
   const caches={async keys(){return ready?['randomisera-offline-test']:[]},async delete(){ready=false},async open(){return {async match(){return ready?{}:undefined}}}};
-  const context=vm.createContext({URL,Object,MessageChannel:channel,setTimeout,clearTimeout,document:{readyState:'complete',currentScript:{src:'https://example.com/assets/pwa.js'},getElementById:node},localStorage:{getItem:k=>{if(blocked)throw Error();return store.get(k)||null},setItem(k,v){if(blocked)throw Error();writes.push(v);store.set(k,v)},removeItem(k){if(blocked)throw Error();store.delete(k)}},window:{isSecureContext:true,caches,matchMedia:()=>({matches:installed,addEventListener(){}}),addEventListener(k,f){events[k]=f}},navigator,caches});
+  const context=vm.createContext({URL,Object,MessageChannel:channel,setTimeout,clearTimeout,document:{readyState:'complete',currentScript:{src:'https://example.com/assets/pwa.js'},getElementById:ui?node:()=>null},localStorage:{getItem:k=>{if(blocked)throw Error();return store.get(k)||null},setItem(k,v){if(blocked)throw Error();writes.push(v);store.set(k,v)},removeItem(k){if(blocked)throw Error();store.delete(k)}},window:{isSecureContext:true,caches,matchMedia:()=>({matches:installed,addEventListener(){}}),addEventListener(k,f){events[k]=f}},navigator,caches});
   vm.runInContext(code,context);
   return {nodes,events,writes,store,get ready(){return ready},get registrations(){return registrations},get updates(){return updates},set fail(v){fail=v},click:async id=>{await nodes[id].listeners.click();await tick()},prompt:outcome=>events.beforeinstallprompt({preventDefault(){},async prompt(){},userChoice:Promise.resolve({outcome})})};
 }
@@ -19,3 +19,15 @@ test('existing cache triggers background update check, storage failure does not 
 test('failed preparation opens actionable error, retry clears it',async()=>{const h=harness();await tick();h.fail=true;await h.click('enable-offline');assert(h.nodes['offline-settings'].open);assert.match(h.nodes['offline-status'].className,/error/);h.fail=false;await h.click('enable-offline');assert(h.ready);assert.equal(h.nodes['offline-status'].textContent,'')});
 
 test('installation labels match phone and desktop wording',async()=>{for(const [userAgent,expected] of [['Mozilla Android','Lägg till på hemskärmen'],['iPhone','Lägg till på hemskärmen'],['Chrome Windows','Lägg till som app']]){const h=harness({userAgent});await tick();assert.equal(h.nodes['install-toggle'].textContent,expected)}});
+
+test('tool pages work without installation UI and still maintain offline updates',async()=>{
+  const ordinary=harness({ui:false});await tick();assert.equal(ordinary.registrations,0);assert.equal(ordinary.writes.length,0);
+  const cached=harness({ui:false,cache:true});await tick();assert.equal(cached.updates,1);
+  const app=harness({ui:false,installed:true});await tick();await tick();assert(app.ready);assert.equal(app.registrations,1);
+  const disabled=harness({ui:false,installed:true,stored:{offlineRequested:false}});await tick();assert.equal(disabled.registrations,0);
+});
+
+test('App page exposes offline settings before installation and identifies an open installed app',async()=>{
+  const h=harness();await tick();assert(!h.nodes['offline-settings'].hidden);assert(!h.nodes['enable-offline'].hidden);assert(h.nodes['install-status'].hidden);
+  const installed=harness({installed:true});await tick();assert(!installed.nodes['install-status'].hidden);assert.match(installed.nodes['install-status'].textContent,/redan/);
+});
