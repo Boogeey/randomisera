@@ -80,13 +80,13 @@
     setGroups(lines) {
       reset();
       groups = lines.map(group => [...group]);
-      const available = groups.length >= 2 && groups.length <= 32;
+      const available = groups.length >= 4 && groups.length <= 32;
       $('tournament-start').hidden = !available;
       $('tournament-warning').hidden = !available || new Set(groups.map(group => group.length)).size <= 1;
     }
   };
   $('tournament-start').addEventListener('click', () => {
-    if (groups.length < 2 || groups.length > 32) return;
+    if (groups.length < 4 || groups.length > 32) return;
     if (!schedule.length) {
       schedule = core.tournament(core.shuffle(groups.map((_, i) => 'Lag ' + (i + 1))));
       position = 0;

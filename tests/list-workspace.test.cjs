@@ -251,7 +251,7 @@ test('group results open a knockout without changing members and retain winners 
   const h=harness();
   h.run(fs.readFileSync(path.join(root,'assets/matches-core.js'),'utf8'));
   h.run(fs.readFileSync(path.join(root,'assets/matches.js'),'utf8'));
-  h.switchTo('groups');h.input('A\nB\nC\nD\nE');h.nodes.count.value='2';h.submit();
+  h.switchTo('groups');h.input('A\nB\nC\nD\nE');h.nodes.count.value='4';h.submit();
   const groups=h.nodes.output.children[0].children.map(group=>group.children[1].children.map(item=>item.textContent).join(', '));
   const originalOutput=h.nodes.output.children[0];
   assert(!h.nodes['tournament-start'].hidden);assert(!h.nodes['tournament-warning'].hidden);
@@ -265,13 +265,15 @@ test('group results open a knockout without changing members and retain winners 
   assert(h.nodes['match-output'].querySelectorAll('button').every(b=>b['aria-pressed']==='false'));
   h.nodes['match-back'].click();h.nodes['edit-draw'].click();assert(h.nodes['tournament-start'].hidden);assert(h.nodes['match-presentation'].hidden);
 });
-test('knockout entry is limited to 2–32 groups and equal teams need no warning',()=>{
+test('knockout entry is limited to 4–32 groups and equal teams need no warning',()=>{
   const h=harness();h.run(fs.readFileSync(path.join(root,'assets/matches-core.js'),'utf8'));h.run(fs.readFileSync(path.join(root,'assets/matches.js'),'utf8'));
   h.input(Array.from({length:33},(_,i)=>String(i)).join('\n'));h.submit();assert(h.nodes['tournament-start'].hidden);
   h.switchTo('groups');h.nodes.count.value='1';h.submit();assert(h.nodes['tournament-start'].hidden);
   h.nodes['edit-draw'].click();h.nodes.count.value='33';h.submit();assert(h.nodes['tournament-start'].hidden);
-  h.nodes['edit-draw'].click();h.input('A\nB\nC\nD');h.nodes.count.value='2';h.submit();assert(!h.nodes['tournament-start'].hidden);assert(h.nodes['tournament-warning'].hidden);
-  h.nodes['edit-draw'].click();h.nodes.count.value='4';h.submit();h.nodes['tournament-start'].click();assert.equal(h.nodes['match-output'].querySelectorAll('button').length,4);
+  h.nodes['edit-draw'].click();h.input('A\nB\nC\nD');h.nodes.count.value='2';h.submit();assert(h.nodes['tournament-start'].hidden);assert(h.nodes['tournament-warning'].hidden);
+  h.nodes['tournament-start'].click();assert(h.nodes['match-presentation'].hidden);
+  h.nodes['edit-draw'].click();h.nodes.count.value='3';h.submit();assert(h.nodes['tournament-start'].hidden);assert(h.nodes['tournament-warning'].hidden);
+  h.nodes['edit-draw'].click();h.nodes.count.value='4';h.submit();assert(!h.nodes['tournament-start'].hidden);assert(h.nodes['tournament-warning'].hidden);h.nodes['tournament-start'].click();assert.equal(h.nodes['match-output'].querySelectorAll('button').length,4);
 });
 
 test('group preview updates for names, counts and mode changes without dropping duplicate rows',()=>{

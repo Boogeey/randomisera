@@ -6,7 +6,7 @@ The shared list workspace has three modes: **Välj**, **Gruppera**, and **Blanda
 
 Every non-empty row is a separate entry, including identical names. “Without repetitions” prevents drawing the same row twice in a round; identical names on different rows can still appear more than once. No automatic deduplication is performed.
 
-Legacy URLs (`slumpa-namn/`, `dela-in-i-grupper/`, and `slumpa-lista/`) open the shared workspace in their corresponding mode. Fragment links (`#valj`, `#gruppera`, and `#blanda`) and browser Back switch modes without reloading the list.
+Legacy URLs (`dela-in-i-grupper/` and `slumpa-lista/`) open the shared workspace in their corresponding mode. Fragment links (`#valj`, `#gruppera`, and `#blanda`) and browser Back switch modes without reloading the list.
 
 List tools use a two-step flow. Preparation contains the list and settings; a successful draw opens a dedicated presentation with Copy, Edit, and a repeat action. Returning to preparation clears drawn entries, results, and history, while preserving the list, saved-list selection, and settings. Only the presentation continues a draw session. When a batch exceeds the remaining pool, the repeat action draws the remaining entries before offering a new round, preserving the configured batch size. History is collapsed in the presentation, and remains in memory only. Desktop preparation places settings beside the list; mobile stacks them. Numbers and Slumpval use the same two-step presentation.
 
@@ -66,6 +66,6 @@ Source files remain readable and are never overwritten by the build. esbuild min
 
 Run `npm ci --ignore-scripts` once after checkout or dependency changes, then `npm test` and `npm run build`. GitHub Actions performs these steps automatically using the pinned package-lock.json. Build tools are development dependencies only. Formatting-only changes that produce identical output do not change the cache ID.
 
-## Slutspel från Gruppera
+## Knockout tournaments from groups
 
-Efter Gruppera visas Skapa slutspel med lagen för 2–32 grupper. Exakta grupper följer med som Lag 1, Lag 2 och så vidare, med deltagarna synliga. Olika stora lag tillåts med en upplysning. Lagens platser lottas, frironder hanteras automatiskt och vinnare väljs i presentationen. Tillbaka till lagen behåller gruppresultat, slutspel och valda vinnare; Gruppera igen eller återgång till förberedelse nollställer slutspelet. Slutspel finns bara i minnet och kan kopieras. Partnerbyte och den fristående matchschemasidan är borttagna.
+After grouping, the Create knockout tournament action is available for 4–32 groups. The existing groups become Team 1, Team 2, and so on, with their members visible. Unequal team sizes are allowed with a short notice. Team positions are randomized, byes are handled automatically, and users select winners in the presentation. Back to teams preserves the group results, bracket, and selected winners; regrouping or returning to preparation resets the tournament. Tournament state stays in memory and can be copied as text.
