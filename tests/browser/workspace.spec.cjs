@@ -213,3 +213,27 @@ test('coin has two faces, lands on either result and skips motion when requested
   expect(await coin.evaluate(node => getComputedStyle(node).transform)).toBe(tailsTransform);
   await expect(page.locator('#draw-announcement')).toHaveText('Slumpning 3: Klave');
 });
+test('coin result label stays transparent during the flip and fades in after landing', async ({page}) => {
+  await page.goto('/singla-slant/');
+  await page.locator('#submit').click();
+  const states = await page.locator('#output').evaluate(output => {
+    const coin = output.querySelector('.coin'), label = output.querySelector('.coin-label');
+    const flip = coin.getAnimations()[0], fade = label.getAnimations()[0];
+    flip.pause(); fade.pause();
+    const landing = flip.effect.getTiming().duration;
+    flip.currentTime = landing - 1; fade.currentTime = landing - 1;
+    const before = getComputedStyle(label).opacity;
+    flip.currentTime = landing; fade.currentTime = landing + 90;
+    const during = Number(getComputedStyle(label).opacity);
+    flip.finish(); fade.finish();
+    return {before, during, after: getComputedStyle(label).opacity, delay: fade.effect.getTiming().delay, landing};
+  });
+  expect(states.before).toBe('0');
+  expect(states.delay).toBe(states.landing);
+  expect(states.during).toBeGreaterThan(0);
+  expect(states.during).toBeLessThan(1);
+  expect(states.after).toBe('1');
+  await page.emulateMedia({reducedMotion: 'reduce'});
+  await page.locator('#next-draw').click();
+  await expect(page.locator('.coin-label')).toHaveCSS('opacity', '1');
+});

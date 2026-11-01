@@ -150,6 +150,14 @@ function animateResult({output, mode, decisionMode, diceButtons, lockedDice, red
           {transform: 'translateY(0) rotate(0deg)'}
         ], {duration: 440, delay: Math.min(index * 20, 100), easing: 'ease-out', fill: 'backwards'})
         : target.animate([{opacity: 0.3}, {opacity: 1}], {duration: 240, easing: 'ease-out'}));
+    if (coin) {
+      const label = output.children[0].children[0].children[1];
+      if (typeof label.animate === 'function') {
+        animations.push(label.animate([{opacity: 0}, {opacity: 1}], {
+          duration: 180, delay: 650, easing: 'ease-out', fill: 'backwards'
+        }));
+      }
+    }
     return {cancel: () => animations.forEach(animation => animation.cancel())};
   }
   return null;
