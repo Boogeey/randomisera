@@ -207,6 +207,7 @@ html{scroll-behavior:smooth}@media(prefers-reduced-motion:reduce){html{scroll-be
 }
 .list-page .draw-settings #countFields { grid-row: 1; margin: 0; }
 .list-page .draw-settings #uniqueLabel { grid-row: 2; min-height: 40px; margin: 0; }
+.list-page .draw-settings #group-preview { grid-row: 2; margin: 0; padding-block: 7px; font-size: 12px; color: var(--muted); line-height: 1.6; }
 .list-page .draw-settings #error { grid-row: 3; }
 .list-page .draw-settings #submit { grid-row: 4; align-self: start; }
 .list-page .draw-settings > .step-note { grid-row: 5; }
@@ -236,6 +237,10 @@ html{scroll-behavior:smooth}@media(prefers-reduced-motion:reduce){html{scroll-be
 
 .list-page .group-result h3 { color: var(--accent); }
 .list-page ol.results { text-align: left; max-width: 560px; width: 100%; margin-inline: auto; }
+.list-page ol.order-results { list-style: none; counter-reset: place; }
+.list-page ol.order-results > li { display: grid; grid-template-columns: 36px minmax(0,1fr); align-items: baseline; gap: 14px; padding: 15px 4px; border-bottom: 1px solid var(--line); font-size: clamp(20px,3vw,26px); font-weight: 500; line-height: 1.4; color: var(--text); }
+.list-page ol.order-results > li::before { counter-increment: place; content: counter(place) "."; color: var(--muted); font-size: 14px; font-weight: 500; font-variant-numeric: tabular-nums; text-align: right; }
+.list-page ol.order-results > li:last-child { border-bottom: 0; }
 
 body[data-view="presentation"] footer { display: none; }
 
@@ -288,6 +293,37 @@ body[data-view="presentation"] footer { display: none; }
 .dice-hint { margin: 0; font-size: 12px; color: var(--muted); }
 #unlock-dice { display: block; margin: 10px auto 0; min-height: 44px; background: transparent; border-color: transparent; color: var(--accent); font-size: 13px; font-weight: 400; }
 .decision-page .mode-switch button { white-space: normal; }
+#match-origin { text-align: center; }
+#tournament-start { width: 100%; min-height: 46px; margin-top: 12px; border-radius: 9px; background: transparent; font-weight: 500; }
+#tournament-warning { font-size: 12px; margin-top: 16px; text-align: center; }
+.team-members { display: block; margin-top: 5px; color: var(--muted); font-size: 13px; font-weight: 400; }
+.presentation-topbar #match-copy { justify-self: end; }
+.match-stage { padding-block: 30px; }
+.match-stage > h2 { text-align: center; font-size: 22px; margin: 12px 0 26px; }
+.match-stage > .draw-counter { text-align: center; }
+.match-navigation { display: flex; gap: 12px; max-width: 460px; margin: 0 auto; }
+.match-navigation button { flex: 1; min-width: 0; min-height: 48px; border-radius: 9px; }
+.match-navigation .primary { margin-top: 0; padding-inline: 12px; }
+#match-overview { border-top: 1px solid var(--line); margin-top: 28px; }
+#match-overview summary { padding-block: 16px; min-height: 48px; cursor: pointer; font-size: 14px; color: var(--muted); text-align: center; }
+#match-session-note { margin: 20px auto 0; max-width: 60ch; text-align: center; }
+.knockout-round { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+.knockout-match { padding: 14px; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; min-width: 0; }
+.knockout-round > .knockout-match:only-of-type { grid-column: 1/-1; width: 100%; max-width: 460px; margin-inline: auto; }
+.knockout-match > .note { margin-bottom: 10px; }
+.match-team { display: block; width: 100%; min-height: 48px; padding: 12px; text-align: left; font-size: 16px; font-weight: 500; overflow-wrap: anywhere; }
+.match-team + .match-team { margin-top: 8px; }
+div.match-team { color: var(--muted); background: var(--result); border-radius: 5px; }
+.match-team[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: var(--result); color: var(--accent); }
+.winner-label { display: block; font-size: 12px; font-weight: 400; margin-top: 5px; color: var(--accent); }
+.tournament-winner { grid-column: 1/-1; text-align: center; font-size: 26px; color: var(--accent); overflow-wrap: anywhere; }
+.match-guidance { grid-column: 1/-1; text-align: center; margin-top: 6px; }
+.schedule-round { border-bottom: 1px solid var(--line); padding-block: 12px 24px; }
+.schedule-round h3 { font-size: 16px; font-weight: 600; }
+.schedule-round .knockout-match { margin-top: 12px; }
+#match-all { display: flex; gap: 18px; overflow-x: auto; padding-bottom: 12px; }
+.schedule-round { flex: 0 0 250px; border-bottom: 0; }
+@media (max-width:599px) { .knockout-round { grid-template-columns: minmax(0,1fr); } }
 @media (max-width: 360px) {
   .decision-page .mode-switch button { font-size: 12px; padding-inline: 4px; }
   .dice-fields { gap: 12px; }

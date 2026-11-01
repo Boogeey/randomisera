@@ -65,3 +65,7 @@ The separate `randomisera-pwa-preferences` key stores only the offline choice, n
 Source files remain readable and are never overwritten by the build. esbuild minifies JavaScript (including the service worker) and CSS; html-minifier-terser minifies HTML conservatively, preserving quoted attributes and optional tags. The web app manifest is compact JSON. Legal JavaScript/CSS notices are retained. No minifier or node_modules files are shipped to visitors, and no source maps are published.
 
 Run `npm ci --ignore-scripts` once after checkout or dependency changes, then `npm test` and `npm run build`. GitHub Actions performs these steps automatically using the pinned package-lock.json. Build tools are development dependencies only. Formatting-only changes that produce identical output do not change the cache ID.
+
+## Slutspel från Gruppera
+
+Efter Gruppera visas Skapa slutspel med lagen för 2–32 grupper. Exakta grupper följer med som Lag 1, Lag 2 och så vidare, med deltagarna synliga. Olika stora lag tillåts med en upplysning. Lagens platser lottas, frironder hanteras automatiskt och vinnare väljs i presentationen. Tillbaka till lagen behåller gruppresultat, slutspel och valda vinnare; Gruppera igen eller återgång till förberedelse nollställer slutspelet. Slutspel finns bara i minnet och kan kopieras. Partnerbyte och den fristående matchschemasidan är borttagna.

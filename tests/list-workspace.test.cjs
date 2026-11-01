@@ -13,6 +13,7 @@ function harness(initial='choose',hash='',draftStore=null,savedStore=new Map(),b
     return {tag,children:[],animations:[],dataset:{},value:'',maxLength:100000,hidden:false,disabled:false,checked:true,textContent:'',listeners:{},
       animate(frames,options){const animation={frames,options,canceled:false,cancel(){this.canceled=true;}};this.animations.push(animation);return animation;},
       style:{},
+      querySelectorAll(selector){const found=[];const visit=node=>{for(const child of node.children||[]){if(selector==='button'?child.tag==='button':selector==='.knockout-match'&&child.className==='knockout-match')found.push(child);visit(child);}};visit(this);return found;},
       setAttribute(k,v){this[k]=v;},append(...items){this.children.push(...items);},replaceChildren(...items){this.children=items;},
       addEventListener(k,f){(this.listeners[k]??=[]).push(f);},dispatchEvent(e){for(const f of this.listeners[e.type]||[])f(e);},
       click(){this.dispatchEvent({type:'click'});},requestSubmit(){this.dispatchEvent({type:'submit',preventDefault(){}});},focus(){}};
@@ -244,4 +245,55 @@ test('returning to preparation clears locks and dice; other modes remain usable'
 test('dice locks and rerolls respect reduced motion',()=>{
   const h=harness('decide','#tarning',null,new Map(),false,true);h.nodes['dice-count'].value='3';h.submit();h.nodes.output.children[0].children[0].children[0].click();h.nodes['next-draw'].click();
   assert.equal(h.run('lockedDice.size'),1);assert(h.nodes.output.children[0].children.every(li=>li.children[0].animations.length===0));
+});
+
+test('group results open a knockout without changing members and retain winners when returning to groups',()=>{
+  const h=harness();
+  h.run(fs.readFileSync(path.join(root,'assets/matches-core.js'),'utf8'));
+  h.run(fs.readFileSync(path.join(root,'assets/matches.js'),'utf8'));
+  h.switchTo('groups');h.input('A\nB\nC\nD\nE');h.nodes.count.value='2';h.submit();
+  const groups=h.nodes.output.children[0].children.map(group=>group.children[1].children.map(item=>item.textContent).join(', '));
+  const originalOutput=h.nodes.output.children[0];
+  assert(!h.nodes['tournament-start'].hidden);assert(!h.nodes['tournament-warning'].hidden);
+  h.nodes['tournament-start'].click();assert(h.nodes['presentation-view'].hidden);assert(!h.nodes['match-presentation'].hidden);
+  const buttons=h.nodes['match-output'].querySelectorAll('button');
+  assert.deepEqual(buttons.map(b=>b.children[0].textContent).sort(),groups.slice().sort());
+  buttons[0].click();const winner=h.nodes['match-output'].querySelectorAll('button').find(b=>b['aria-pressed']==='true').textContent;
+  h.nodes['match-back'].click();assert(!h.nodes['presentation-view'].hidden);assert.equal(h.nodes.output.children[0],originalOutput);
+  h.nodes['tournament-start'].click();assert.equal(h.nodes['match-output'].querySelectorAll('button').find(b=>b['aria-pressed']==='true').textContent,winner);
+  h.nodes['match-back'].click();h.nodes['next-draw'].click();h.nodes['tournament-start'].click();
+  assert(h.nodes['match-output'].querySelectorAll('button').every(b=>b['aria-pressed']==='false'));
+  h.nodes['match-back'].click();h.nodes['edit-draw'].click();assert(h.nodes['tournament-start'].hidden);assert(h.nodes['match-presentation'].hidden);
+});
+test('knockout entry is limited to 2–32 groups and equal teams need no warning',()=>{
+  const h=harness();h.run(fs.readFileSync(path.join(root,'assets/matches-core.js'),'utf8'));h.run(fs.readFileSync(path.join(root,'assets/matches.js'),'utf8'));
+  h.input(Array.from({length:33},(_,i)=>String(i)).join('\n'));h.submit();assert(h.nodes['tournament-start'].hidden);
+  h.switchTo('groups');h.nodes.count.value='1';h.submit();assert(h.nodes['tournament-start'].hidden);
+  h.nodes['edit-draw'].click();h.nodes.count.value='33';h.submit();assert(h.nodes['tournament-start'].hidden);
+  h.nodes['edit-draw'].click();h.input('A\nB\nC\nD');h.nodes.count.value='2';h.submit();assert(!h.nodes['tournament-start'].hidden);assert(h.nodes['tournament-warning'].hidden);
+  h.nodes['edit-draw'].click();h.nodes.count.value='4';h.submit();h.nodes['tournament-start'].click();assert.equal(h.nodes['match-output'].querySelectorAll('button').length,4);
+});
+
+test('group preview updates for names, counts and mode changes without dropping duplicate rows',()=>{
+ const h=harness();h.input('A\nB\nC\nD\nE\nF\nG\nH\nI');assert(h.nodes['group-preview'].hidden);
+ h.switchTo('groups');h.nodes.count.value='4';h.nodes.count.dispatchEvent({type:'input'});
+ assert.equal(h.nodes['group-preview'].textContent,'1 grupp med 3 deltagare och 3 grupper med 2.');assert(!h.nodes['group-preview'].hidden);
+ h.nodes.count.value='3';h.nodes.count.dispatchEvent({type:'input'});assert.equal(h.nodes['group-preview'].textContent,'3 grupper med 3 deltagare i varje.');
+ h.input('A\nA\nB');h.nodes.count.value='3';h.nodes.count.dispatchEvent({type:'input'});assert.equal(h.nodes['group-preview'].textContent,'3 grupper med 1 deltagare i varje.');
+ h.nodes.count.value='4';h.nodes.count.dispatchEvent({type:'input'});assert.equal(h.nodes['group-preview'].textContent,'Lägg till 1 namn för att få 4 grupper.');
+ for(const count of ['', '0', '1.5','1001']){h.nodes.count.value=count;h.nodes.count.dispatchEvent({type:'input'});assert(h.nodes['group-preview'].hidden);}
+ h.input('');assert(h.nodes['group-preview'].hidden);h.switchTo('list');assert(h.nodes['group-preview'].hidden);
+});
+
+test('shuffled order reveals numbered rows in sequence, caps animation duration and respects reduced motion',()=>{
+ const h=harness();h.switchTo('list');h.input(Array.from({length:50},(_,i)=>'Namn '+i).join('\n'));h.submit();
+ const list=h.nodes.output.children[0], rows=list.children;
+ assert.equal(list.tag,'ol');assert.equal(list.role,'list');assert.equal(h.nodes['result-title'].textContent,'Din turordning');assert(h.nodes.status.hidden);
+ assert.equal(rows.length,50);assert.equal(rows.filter(row=>row.animations.length).length,20);
+ assert.equal(rows[0].animations[0].options.delay,0);assert(rows[1].animations[0].options.delay>0);
+ assert(rows[19].animations[0].options.delay+rows[19].animations[0].options.duration<=1000);
+ h.nodes['next-draw'].click();assert(rows.slice(0,20).every(row=>row.animations[0].canceled));
+ const fresh=h.nodes.output.children[0].children;h.nodes['edit-draw'].click();assert(fresh.slice(0,20).every(row=>row.animations[0].canceled));
+ const reduced=harness('choose','',null,new Map(),false,true);reduced.switchTo('list');reduced.input('A\nB\nC');reduced.submit();
+ assert(reduced.nodes.output.children[0].children.every(row=>row.animations.length===0));
 });

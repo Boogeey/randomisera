@@ -33,6 +33,7 @@ function setDrawView(presentation, focus = false) {
   $('presentation-view').hidden = !presentation;
   document.body.dataset.view = presentation ? 'presentation' : 'prepare';
   if (!presentation) {
+    window.GroupTournament?.reset();
     diceValues = [];
     diceButtons = [];
     lockedDice.clear();
@@ -65,6 +66,26 @@ function setDrawView(presentation, focus = false) {
 function clearResult() {
   $('error').hidden = true;
   setDrawView(false);
+  updateGroupPreview();
+}
+
+function updateGroupPreview() {
+  const preview = $('group-preview');
+  if (!preview) return;
+  const total = mode === 'groups' ? entries().length : 0;
+  const count = Number($('count').value);
+  preview.hidden = !total || !Number.isInteger(count) || count < 1 || count > 1000;
+  preview.textContent = '';
+  if (preview.hidden) return;
+  if (count > total) {
+    preview.textContent = `Lägg till ${count - total} namn för att få ${count} grupper.`;
+    return;
+  }
+  const size = Math.floor(total / count), larger = total % count;
+  const groupText = n => n === 1 ? '1 grupp' : `${n} grupper`;
+  preview.textContent = larger
+    ? `${groupText(larger)} med ${size + 1} deltagare och ${groupText(count - larger)} med ${size}.`
+    : `${groupText(count)} med ${size} deltagare i varje.`;
 }
 
 function selectMode(next) {
@@ -233,10 +254,15 @@ function formatResult(lines, status) {
 }
 
 function renderResult(lines) {
+  window.GroupTournament?.setGroups(mode === 'groups' ? lines : []);
   const dice = mode === 'decide' && decisionMode === 'dice';
   diceButtons = [];
   const result = document.createElement(mode === 'list' ? 'ol' : mode === 'groups' ? 'div' : 'ul');
   result.className = dice ? 'results dice-results' : 'results';
+  if (mode === 'list') {
+    result.className = 'results order-results';
+    result.setAttribute('role', 'list');
+  }
   for (const [index, line] of lines.entries()) {
     if (mode === 'groups') {
       const group = document.createElement('section'), heading = document.createElement('h3'), members = document.createElement('ul');
@@ -273,12 +299,12 @@ function renderResultContext(lines) {
     $('presentation-origin').textContent = decisionMode === 'dice'
       ? $('dice-count').value + (Number($('dice-count').value) === 1 ? ' tärning med ' : ' tärningar med ') + $('dice-sides').value + ' sidor' : config.origin;
   } else {
-    $('result-title').textContent = mode === 'groups' ? 'Dina grupper' : mode === 'list' ? 'Din nya ordning' : 'Slumpen valde';
+    $('result-title').textContent = mode === 'groups' ? 'Dina grupper' : mode === 'list' ? 'Din turordning' : 'Slumpen valde';
     const active = $('active-list-name');
     const name = active && !$('active-list').hidden ? active.textContent.replace(/^Hämtad lista: /, '') : 'Din lista';
     $('presentation-origin').textContent = name + ' · ' + entries().length + ' alternativ';
   }
-  $('status').hidden = mode === 'numbers' || (mode === 'decide' && decisionMode !== 'dice');
+  $('status').hidden = mode === 'numbers' || mode === 'list' || (mode === 'decide' && decisionMode !== 'dice');
 }
 
 function show(lines, status) {
@@ -299,10 +325,15 @@ function show(lines, status) {
   resultAnimation?.cancel();
   resultAnimation = null;
   if (!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) {
-    const targets = mode === 'decide' && decisionMode === 'dice'
+    // Animate the first screenfuls; long lists stay responsive and immediately usable.
+    const order = mode === 'list';
+    const targets = order ? Array.from($('output').children[0].children).slice(0, 20)
+      : mode === 'decide' && decisionMode === 'dice'
       ? diceButtons.filter((_, index) => !lockedDice.has(index)) : [$('output')];
     const animations = targets.filter(target => typeof target.animate === 'function')
-      .map(target => target.animate([{opacity: 0.3}, {opacity: 1}], {duration: 240, easing: 'ease-out'}));
+      .map((target, index) => order
+        ? target.animate([{opacity: 0, transform: 'translateY(8px)'}, {opacity: 1, transform: 'translateY(0)'}], {duration: 280, delay: index * Math.min(65, 650 / Math.max(1, targets.length - 1)), easing: 'ease-out', fill: 'backwards'})
+        : target.animate([{opacity: 0.3}, {opacity: 1}], {duration: 240, easing: 'ease-out'}));
     resultAnimation = {cancel: () => animations.forEach(animation => animation.cancel())};
   }
 }
@@ -363,6 +394,7 @@ async function copyText(text, button) {
 $('form').addEventListener('submit', submitDraw);
 for (const id of ['entries', 'unique']) $(id)?.addEventListener('input', clearResult);
 $('count')?.addEventListener('input', updateNextDraw);
+$('count')?.addEventListener('input', updateGroupPreview);
 $('copy').addEventListener('click', () => copyText(lastText, $('copy')));
 $('edit-draw').addEventListener('click', () => setDrawView(false, true));
 $('next-draw').addEventListener('click', () => $('form').requestSubmit());
