@@ -23,9 +23,11 @@ function updateToolContent(document, content, key) {
 function renderResult(document, lines, {mode, decisionMode, diceSides, onToggleDie}) {
   const $ = id => document.getElementById(id);
   const dice = mode === 'decide' && decisionMode === 'dice';
+  const coin = mode === 'decide' && decisionMode === 'coin';
   const diceButtons = [];
   const result = document.createElement(mode === 'list' ? 'ol' : mode === 'groups' ? 'div' : 'ul');
   result.className = dice ? 'results dice-results' : 'results';
+  if (coin) result.className = 'results coin-results';
   if (mode === 'list') {
     result.className = 'results order-results';
     result.setAttribute('role', 'list');
@@ -65,6 +67,20 @@ function renderResult(document, lines, {mode, decisionMode, diceSides, onToggleD
         button.addEventListener('click', () => onToggleDie(index));
         diceButtons.push(button);
         item.append(button);
+      } else if (coin) {
+        const disc = document.createElement('span');
+        disc.className = 'coin';
+        disc.dataset.side = line === 'Krona' ? 'heads' : 'tails';
+        disc.setAttribute('aria-hidden', 'true');
+        for (const side of ['heads', 'tails']) {
+          const face = document.createElement('span');
+          face.className = 'coin-face coin-face--' + side;
+          disc.append(face);
+        }
+        const label = document.createElement('span');
+        label.className = 'coin-label';
+        label.textContent = line;
+        item.append(disc, label);
       } else item.textContent = line;
       result.append(item);
     }
@@ -112,11 +128,18 @@ function animateResult({output, mode, decisionMode, diceButtons, lockedDice, red
   if (!reducedMotion) {
     // Animate the first screenfuls; long lists stay responsive and immediately usable.
     const stagger = mode === 'list' || mode === 'groups';
-    const targets = stagger ? Array.from(output.children[0].children).slice(0, 20)
+    const coin = mode === 'decide' && decisionMode === 'coin';
+    const targets = coin ? [output.children[0].children[0].children[0]] : stagger ? Array.from(output.children[0].children).slice(0, 20)
       : mode === 'decide' && decisionMode === 'dice'
       ? diceButtons.filter((_, index) => !lockedDice.has(index)) : [output];
     const animations = targets.filter(target => typeof target.animate === 'function')
-      .map((target, index) => stagger
+      .map((target, index) => coin
+        ? target.animate([
+          {transform: `translateY(0) rotateY(${1080 + (target.dataset.side === 'tails' ? 180 : 0)}deg)`},
+          {transform: `translateY(-24px) rotateY(${540 + (target.dataset.side === 'tails' ? 180 : 0)}deg)`, offset: 0.4},
+          {transform: `translateY(0) rotateY(${target.dataset.side === 'tails' ? 180 : 0}deg)`}
+        ], {duration: 650, easing: 'cubic-bezier(0.2, 0.65, 0.3, 1)'})
+        : stagger
         ? target.animate([{opacity: 0, transform: 'translateY(8px)'}, {opacity: 1, transform: 'translateY(0)'}], {duration: 280, delay: index * Math.min(65, 650 / Math.max(1, targets.length - 1)), easing: 'ease-out', fill: 'backwards'})
         : target.className === 'die-button die-button--six'
         ? target.animate([

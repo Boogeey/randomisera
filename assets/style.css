@@ -1358,3 +1358,60 @@ div.match-team {
     gap: 12px;
   }
 }
+
+/* Two CSS faces share one short, native coin-flip animation. */
+.coin-results > li {
+  perspective: 700px;
+}
+.coin {
+  position: relative;
+  display: block;
+  width: 132px;
+  height: 132px;
+  margin: 16px auto 22px;
+  transform-style: preserve-3d;
+}
+.coin[data-side=tails] {
+  transform: rotateY(180deg);
+}
+.coin-face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border: 3px solid #ad853d;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fff0bf, #e8c779 60%, #d9b262);
+  color: #70521e;
+  box-shadow: inset 0 0 0 5px #efd492, inset 0 0 0 7px #b89043, 0 3px 0 #a67d35;
+  backface-visibility: hidden;
+}
+.coin-face--heads::before {
+  content: '';
+  width: 56px;
+  height: 42px;
+  background: currentColor;
+  clip-path: polygon(0 12%, 27% 38%, 50% 0, 73% 38%, 100% 12%, 88% 83%, 12% 83%);
+}
+.coin-face--heads::after {
+  content: '';
+  position: absolute;
+  width: 43px;
+  height: 5px;
+  top: 85px;
+  border-radius: 2px;
+  background: currentColor;
+}
+.coin-face--tails {
+  transform: rotateY(180deg);
+}
+.coin-face--tails::before {
+  content: '1';
+  font: 600 68px/1 Georgia, serif;
+  letter-spacing: 0;
+}
+.list-page #output .coin-label {
+  display: block;
+  font-size: 32px;
+  letter-spacing: -0.5px;
+}

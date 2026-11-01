@@ -182,3 +182,32 @@ test('six-sided dice show matching pips, tumble only when unlocked and respect r
   await expect(page.locator('.die-face')).toHaveCount(0);
   await expect(page.locator('.die-button').first()).toHaveText(/^\d+$/);
 });
+test('coin has two faces, lands on either result and skips motion when requested', async ({page}) => {
+  await page.goto('/singla-slant/');
+  await page.evaluate(() => { crypto.getRandomValues = values => {values.fill(0); return values;}; });
+  await page.locator('#submit').click();
+  const coin = page.locator('.coin');
+  await expect(coin).toHaveAttribute('data-side', 'heads');
+  await expect(page.locator('.coin-label')).toHaveText('Krona');
+  await expect(coin.locator('.coin-face')).toHaveCount(2);
+  const frames = await coin.evaluate(async node => {
+    const animation = node.getAnimations()[0];
+    const frames = animation.effect.getKeyframes();
+    await animation.finished;
+    return frames;
+  });
+  expect(frames[0].transform).toContain('1080deg');
+  await expect(coin).toHaveCSS('transform', 'none');
+  await page.evaluate(() => { crypto.getRandomValues = values => {values.fill(1); return values;}; });
+  await page.locator('#next-draw').click();
+  await expect(coin).toHaveAttribute('data-side', 'tails');
+  await expect(page.locator('.coin-label')).toHaveText('Klave');
+  await coin.evaluate(async node => {await Promise.all(node.getAnimations().map(animation => animation.finished));});
+  const tailsTransform = await coin.evaluate(node => getComputedStyle(node).transform);
+  expect(tailsTransform).not.toBe('none');
+  await page.emulateMedia({reducedMotion: 'reduce'});
+  await page.locator('#next-draw').click();
+  expect(await page.locator('#output').evaluate(node => node.getAnimations({subtree: true}).length)).toBe(0);
+  expect(await coin.evaluate(node => getComputedStyle(node).transform)).toBe(tailsTransform);
+  await expect(page.locator('#draw-announcement')).toHaveText('Slumpning 3: Klave');
+});
