@@ -237,3 +237,28 @@ test('coin result label stays transparent during the flip and fades in after lan
   await page.locator('#next-draw').click();
   await expect(page.locator('.coin-label')).toHaveCSS('opacity', '1');
 });
+test('all numbered dice types spin on reroll while locked dice stay still', async ({page}) => {
+  for (const sides of ['4', '8', '10', '12', '20', '100']) {
+    await page.emulateMedia({reducedMotion: 'no-preference'});
+    await page.goto('/kasta-tarning/');
+    await page.locator('#dice-sides').selectOption(sides);
+    await page.locator('#dice-count').fill('2');
+    await page.locator('#submit').click();
+    const dice = page.locator('.die-button');
+    const value = await dice.first().textContent();
+    await dice.first().click();
+    await page.locator('#next-draw').click();
+    await expect(dice.first()).toHaveText(value);
+    const animation = await dice.nth(1).evaluate(node => {
+      const animation = node.getAnimations()[0];
+      animation.pause();
+      return animation.effect.getKeyframes();
+    });
+    expect(animation.some(frame => /rotate\(/.test(frame.transform || ''))).toBe(true);
+    expect(await dice.first().evaluate(node => node.getAnimations().length)).toBe(0);
+    await expect(page.locator('.die-face')).toHaveCount(0);
+    await page.emulateMedia({reducedMotion: 'reduce'});
+    await page.locator('#next-draw').click();
+    expect(await page.locator('#output').evaluate(node => node.getAnimations({subtree: true}).length)).toBe(0);
+  }
+});

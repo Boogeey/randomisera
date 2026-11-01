@@ -141,7 +141,7 @@ function animateResult({output, mode, decisionMode, diceButtons, lockedDice, red
         ], {duration: 650, easing: 'cubic-bezier(0.2, 0.65, 0.3, 1)'})
         : stagger
         ? target.animate([{opacity: 0, transform: 'translateY(8px)'}, {opacity: 1, transform: 'translateY(0)'}], {duration: 280, delay: index * Math.min(65, 650 / Math.max(1, targets.length - 1)), easing: 'ease-out', fill: 'backwards'})
-        : target.className === 'die-button die-button--six'
+        : mode === 'decide' && decisionMode === 'dice'
         ? target.animate([
           // One 2D transform avoids edge-on faces and multi-axis compositing on phones.
           {transform: 'translateY(-6px) rotate(-100deg)'},
