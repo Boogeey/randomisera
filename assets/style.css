@@ -1451,3 +1451,9 @@ div.match-team {
 .confetti-piece { position: absolute; top: 0; width: 8px; height: 13px; border-radius: 2px; }
 
 .tournament-winner-members { display: block; margin-top: 8px; font-size: 18px; line-height: 1.5; overflow-wrap: anywhere; }
+
+/* Repeated draw and celebration taps must not trigger double-tap zoom; retain pinch zoom. */
+#submit,
+#next-draw,
+#reset,
+#match-next { touch-action: manipulation; }
