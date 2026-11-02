@@ -3,7 +3,7 @@
 const CACHE = 'randomisera-offline-development';
 // Build injects the SHA-256 integrity of every final published file.
 const INTEGRITY = {};
-const FILES = ["./","slumpa-nummer/","dela-in-i-grupper/","slumpa-lista/","singla-slant/","ja-eller-nej/","kasta-tarning/","lagring-och-integritet/","app/","assets/style.css","assets/app.js","assets/pwa.js","manifest.webmanifest","assets/icons/icon-192.png","assets/icons/icon-512.png","assets/icons/icon-maskable-512.png","assets/icons/apple-touch-icon.png","assets/icons/favicon.ico"];
+const FILES = ["./","slumpa-nummer/","dela-in-i-grupper/","slumpa-lista/","singla-slant/","ja-eller-nej/","kasta-tarning/","lagring-och-integritet/","app/","assets/style.css","assets/fonts/inter-latin-variable.woff2","assets/fonts/inter-latin-ext-variable.woff2","assets/fonts/OFL-Inter.txt","assets/app.js","assets/pwa.js","manifest.webmanifest","assets/icons/icon-192.png","assets/icons/icon-512.png","assets/icons/icon-maskable-512.png","assets/icons/apple-touch-icon.png","assets/icons/favicon.ico"];
 const urls = FILES.map(file => new URL(file, self.registration.scope).href);
 function releaseRequest(url) {
   const integrity = INTEGRITY[FILES[urls.indexOf(url)]];
