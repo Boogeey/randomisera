@@ -1,0 +1,51 @@
+const {test, expect} = require('@playwright/test');
+async function final(page) {
+  await page.goto('/#gruppera');
+  await page.locator('#entries').fill('Anna\nBo\nCecilia\nDavid');
+  await page.locator('#group-method').selectOption('groups');
+  await page.locator('#count').fill('4');
+  await page.locator('#submit').click();
+  await page.locator('#tournament-start').click();
+  await page.locator('#match-output .knockout-match').nth(0).locator('button').first().click();
+  await page.locator('#match-output .knockout-match').nth(1).locator('button').first().click();
+  await page.locator('#match-next').click();
+  await expect(page.locator('#match-next')).toHaveText('Fira vinnaren!');
+  await expect(page.locator('#match-next')).toBeDisabled();
+  await page.locator('#match-output button').first().click();
+  await expect(page.locator('#match-next')).toBeEnabled();
+  const members = await page.locator('#match-output button[aria-pressed="true"] .team-members').textContent();
+  await expect(page.locator('.tournament-winner-members')).toHaveText(members);
+}
+test('final celebration is repeatable, throttled and cleared on navigation; invalidated winners lock it', async ({page}) => {
+  await final(page);
+  const winner = await page.locator('.tournament-winner').textContent();
+  await page.locator('#match-next').click();
+  await expect(page.locator('.confetti-piece')).toHaveCount(48);
+  await page.evaluate(() => {for(let i=0;i<100;i++) document.getElementById('match-next').click();});
+  expect(await page.locator('.confetti-piece').count()).toBeLessThanOrEqual(96);
+  await expect.poll(async()=>{await page.locator('#match-next').click();return page.locator('.confetti-piece').count();}).toBeGreaterThan(48);
+  expect(await page.locator('.confetti-piece').count()).toBeLessThanOrEqual(240);
+  await expect(page.locator('.tournament-winner')).toHaveText(winner);
+  await page.screenshot({path:'.local/screenshots/final-confetti-'+test.info().project.name+'.png'});
+  await page.locator('#match-prev').click();
+  await expect(page.locator('.confetti-layer')).toHaveCount(0);
+  await expect(page.locator('#match-next')).toHaveText('Nästa omgång ›');
+  await page.locator('#match-output .knockout-match').first().locator('button').nth(1).click();
+  await page.locator('#match-next').click();
+  await expect(page.locator('#match-next')).toBeDisabled();
+  await page.locator('#match-output button').first().click();
+  await page.locator('#match-next').click();
+  await expect(page.locator('.confetti-layer')).toHaveCount(1);
+  await page.locator('#match-back').click();
+  await expect(page.locator('.confetti-layer')).toHaveCount(0);
+});
+test('reduced motion celebrates without falling particles and cleans up automatically', async ({page}) => {
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await final(page);
+  await page.locator('#match-next').click();
+  await expect(page.locator('.confetti-piece')).toHaveCount(48);
+  expect(await page.locator('.confetti-piece').first().evaluate(node=>node.getAnimations()[0].effect.getKeyframes().every(frame=>!frame.transform))).toBe(true);
+  await expect(page.locator('.confetti-layer')).toHaveCount(0);
+  await page.locator('#match-next').click();
+  await expect(page.locator('.confetti-piece')).toHaveCount(48);
+});

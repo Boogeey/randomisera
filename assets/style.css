@@ -1445,3 +1445,9 @@ div.match-team {
   font-size: 32px;
   letter-spacing: -0.5px;
 }
+
+/* Decorative celebration never intercepts controls or creates page overflow. */
+.confetti-layer { position: fixed; inset: 0; z-index: 100; overflow: hidden; pointer-events: none; }
+.confetti-piece { position: absolute; top: 0; width: 8px; height: 13px; border-radius: 2px; }
+
+.tournament-winner-members { display: block; margin-top: 8px; font-size: 18px; line-height: 1.5; overflow-wrap: anywhere; }

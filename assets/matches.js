@@ -1,8 +1,10 @@
 'use strict';
 const core = require('./matches-core.js');
+const {createConfetti} = require('./confetti.js');
 function initTournament({document, window, navigator}) {
   const $ = id => document.getElementById(id);
   let groups = [], schedule = [], position = 0;
+  const confetti = createConfetti({document, window});
   const element = (tag, text, className) => {
     const node = document.createElement(tag);
     if (text !== undefined) node.textContent = text;
@@ -27,10 +29,11 @@ function initTournament({document, window, navigator}) {
         node.setAttribute('aria-pressed', String(winner === team));
         node.setAttribute('aria-label', team.name + ': ' + members(team) + (winner === team ? ', vald vinnare' : ', välj som vinnare'));
         node.addEventListener('click', () => {
+          confetti.clear();
           core.win(schedule, round, index, team);
           render();
           $('match-output').querySelectorAll('.knockout-match')[index].querySelectorAll('button')[side].focus({preventScroll: true});
-          $('match-announcement').textContent = team.name + (round === schedule.length - 1 ? ' vinner slutspelet.' : ' går vidare.');
+          $('match-announcement').textContent = team.name + (round === schedule.length - 1 ? ' vinner slutspelet: ' + members(team) + '.' : ' går vidare.');
         });
       }
       if (team !== null) node.append(element('span', members(team), 'team-members'));
@@ -46,8 +49,13 @@ function initTournament({document, window, navigator}) {
     $('match-counter').textContent = 'Omgång ' + (position + 1) + ' av ' + schedule.length;
     $('match-origin').textContent = groups.length + ' lag · Utslagsspel';
     schedule[position].forEach((_, index) => $('match-output').append(matchCard(position, index, true)));
-    if (position === schedule.length - 1 && core.advancing(schedule, position, 0)) $('match-output').append(element('p', 'Vinnare: ' + core.advancing(schedule, position, 0).name, 'tournament-winner'));
-    $('match-output').append(element('p', 'Välj vinnaren i varje match. Ändrar du en vinnare nollställs berörda matcher längre fram.', 'note match-guidance'));
+    const champion = position === schedule.length - 1 ? core.advancing(schedule, position, 0) : null;
+    if (champion) {
+      const result = element('p', 'Vinnare: ' + champion.name, 'tournament-winner');
+      result.append(element('span', members(champion), 'team-members tournament-winner-members'));
+      $('match-output').append(result);
+    }
+    if (position < schedule.length - 1) $('match-output').append(element('p', 'Välj vinnaren i varje match. Ändrar du en vinnare nollställs berörda matcher längre fram.', 'note match-guidance'));
     schedule.forEach((round, i) => {
       const section = element('section', undefined, 'schedule-round');
       section.append(element('h3', roundName(i)));
@@ -55,16 +63,20 @@ function initTournament({document, window, navigator}) {
       $('match-all').append(section);
     });
     $('match-prev').disabled = position === 0;
-    $('match-next').disabled = position === schedule.length - 1;
+    const final = position === schedule.length - 1;
+    $('match-next').textContent = final ? 'Fira vinnaren!' : 'Nästa omgång ›';
+    $('match-next').disabled = final && !core.advancing(schedule, position, 0);
     $('match-copy').textContent = 'Kopiera slutspel';
   }
   function move(delta) {
+    confetti.clear();
     position = Math.max(0, Math.min(schedule.length - 1, position + delta));
     render();
     $('match-title').focus({preventScroll: true});
     $('match-title').scrollIntoView({block: 'nearest'});
   }
   function reset() {
+    confetti.clear();
     groups = [];
     schedule = [];
     position = 0;
@@ -101,13 +113,17 @@ function initTournament({document, window, navigator}) {
     $('match-title').focus({preventScroll: true});
   });
   $('match-back').addEventListener('click', () => {
+    confetti.clear();
     $('match-presentation').hidden = true;
     $('presentation-view').hidden = false;
     $('tournament-start').focus({preventScroll: true});
     window.scrollTo({top: 0, behavior: 'instant'});
   });
   $('match-prev').addEventListener('click', () => move(-1));
-  $('match-next').addEventListener('click', () => move(1));
+  $('match-next').addEventListener('click', () => {
+    if (position !== schedule.length - 1) { move(1); return; }
+    if (core.advancing(schedule, position, 0)) confetti.burst();
+  });
   $('match-copy').addEventListener('click', async () => {
     const text = groups.map(group => group.name + ': ' + members(group)).join('\n') + '\n\n' + schedule.map((round, r) => roundName(r) + '\n' + round.map((_, i) => {
       const teams = core.sides(schedule, r, i), winner = core.advancing(schedule, r, i);
